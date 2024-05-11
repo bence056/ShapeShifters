@@ -2,3 +2,8 @@
 
 
 #include "ShapeShifters/Public/Framework/ShiftersGameMode.h"
+
+AShiftersGameMode::AShiftersGameMode()
+{
+	PlatformMovementSpeed = 100.f;
+}

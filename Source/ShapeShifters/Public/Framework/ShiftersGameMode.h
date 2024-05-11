@@ -13,4 +13,12 @@ UCLASS()
 class SHAPESHIFTERS_API AShiftersGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+
+public:
+
+	AShiftersGameMode();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float PlatformMovementSpeed;
+	
 };

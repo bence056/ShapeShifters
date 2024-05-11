@@ -23,12 +23,10 @@ void AShifterPlayerController::BeginPlay()
 			{
 				if(AShifterSpawner* Locator = Cast<AShifterSpawner>(UGameplayStatics::GetActorOfClass(GetWorld(), AShifterSpawner::StaticClass())))
 				{
-					for(int32 i=0; i<8; i++)
-					{
-						UE_LOG(LogTemp, Warning, TEXT("%s"), *Locator->GetGridLocationByIndex(i).ToString());
-						GetWorld()->SpawnActor<AShifterCharacter>(ShifterClass, Locator->GetGridLocationByIndex(i), Locator->GetActorRotation());
-					}
-					// ShifterCharacter = GetWorld()->SpawnActor<AShifterCharacter>(ShifterClass, Locator->GetActorLocation(), Locator->GetActorRotation());
+					int32 RandSpawnSlot = FMath::RandRange(0, Locator->GridWidth-1);
+					ShifterCharacter = GetWorld()->SpawnActor<AShifterCharacter>(ShifterClass, Locator->GetGridLocationByIndex(RandSpawnSlot), Locator->GetActorRotation());
+					ShifterCharacter->LaneIndex = RandSpawnSlot;
+					CameraActor->SetControlledPlayer(ShifterCharacter);
 				}
 				
 			}

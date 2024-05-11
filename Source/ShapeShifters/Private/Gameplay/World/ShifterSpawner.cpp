@@ -42,5 +42,6 @@ FVector AShifterSpawner::GetGridLocationByIndex(int32 Index)
 void AShifterSpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 }
 
