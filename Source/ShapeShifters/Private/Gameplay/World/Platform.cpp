@@ -29,6 +29,12 @@ void APlatform::BeginPlay()
 	
 }
 
+void APlatform::FellOutOfWorld(const UDamageType& dmgType)
+{
+	UE_LOG(LogTemp, Warning,TEXT("KILLL"));
+	Super::FellOutOfWorld(dmgType);
+}
+
 // Called every frame
 void APlatform::Tick(float DeltaTime)
 {
@@ -36,5 +42,10 @@ void APlatform::Tick(float DeltaTime)
 	
 	SetActorLocation(GetActorLocation() + FVector(-1.f, 0.f, 0.f) * DeltaTime * Speed);
 	
+}
+
+void APlatform::DestroyPlatformAndContents()
+{
+	Destroy();
 }
 
