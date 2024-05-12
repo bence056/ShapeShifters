@@ -73,11 +73,7 @@ void APlatform::SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y)
 {
 	AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(X, Y), FRotator::ZeroRotator);
 	Obstacle->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-	FGridData Entry = FGridData();
-	Entry.CellX = X;
-	Entry.CellY = Y;
-	Entry.ContainedObstacle = Obstacle;
-	GridData.Add(Entry);
+	SetDataAt(X, Y, Obstacle);
 }
 
 TArray<FGridData*> APlatform::GetEmptyInRow(int32 X)
@@ -93,17 +89,29 @@ TArray<FGridData*> APlatform::GetEmptyInRow(int32 X)
 	return FreeCells;
 }
 
-FGridData* APlatform::GetDataAt(int32 X, int32 Y)
+bool APlatform::IsGridOccupiedAt(int32 X, int32 Y)
 {
 	for(auto& Entry : GridData)
 	{
 		if(Entry.CellX == X && Entry.CellY == Y)
 		{
-			return &Entry;
+			return Entry.ContainedObstacle != nullptr;
 		}
 	}
-	return nullptr;
+	return false;
 }
+
+void APlatform::SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle)
+{
+	for(auto& Entry : GridData)
+	{
+		if(Entry.CellX == X && Entry.CellY == Y)
+		{
+			Entry.ContainedObstacle = NewObstacle;
+		}
+	}	
+}
+
 
 // Called every frame
 void APlatform::Tick(float DeltaTime)
@@ -155,7 +163,7 @@ void APlatform::GeneratePlatformContents()
 					{
 						PossibleWallStarts.Add(Free->CellY);
 					}
-					int32 StartCell = PossibleWallStarts[FMath::RandRange(0, PossibleWallStarts.Num()-1)];
+					int32 StartCell = PossibleWallStarts[FMath::RandRange(0,PossibleWallStarts.Num()-1)];
 					TArray<int32> PossibleWallEnds;
 					//add the starting one (so we can and where we started);
 					PossibleWallEnds.Add(StartCell);
@@ -169,10 +177,9 @@ void APlatform::GeneratePlatformContents()
 						if(locY != 0)
 						{
 							//step one left.
-							FGridData* CellLeft = GetDataAt(RowCount, --locY);
-							if(CellLeft && !CellLeft->ContainedObstacle && FreeSlots > 1)
+							if(!IsGridOccupiedAt(RowCount, --locY) && FreeSlots > 1)
 							{
-								PossibleWallEnds.Add(CellLeft->CellY);
+								PossibleWallEnds.Add(locY);
 								FreeSlots--;
 							}else
 							{
@@ -191,11 +198,10 @@ void APlatform::GeneratePlatformContents()
 					{
 						if(locY != 7)
 						{
-							//step one left.
-							FGridData* CellRight = GetDataAt(RowCount, ++locY);
-							if(CellRight && !CellRight->ContainedObstacle && FreeSlots > 1)
+							//step one right.
+							if(!IsGridOccupiedAt(RowCount, ++locY) && FreeSlots > 1)
 							{
-								PossibleWallEnds.Add(CellRight->CellY);
+								PossibleWallEnds.Add(locY);
 								FreeSlots--;
 							}else
 							{
@@ -208,6 +214,12 @@ void APlatform::GeneratePlatformContents()
 					}
 					int32 EndCell = PossibleWallEnds[FMath::RandRange(0, PossibleWallEnds.Num()-1)];
 
+					for(auto& j : PossibleWallEnds)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("%d"), j);
+					}
+					UE_LOG(LogTemp, Warning, TEXT("----------------------------"));
+					
 					//Generate Wall.
 				
 					int32 ArrayStart = FMath::Min(StartCell, EndCell);

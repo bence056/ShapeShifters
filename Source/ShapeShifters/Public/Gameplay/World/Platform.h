@@ -14,7 +14,7 @@ enum class EPlatformContentTypes : uint8
 	Wall
 };
 
-USTRUCT()
+USTRUCT(Blueprintable, BlueprintType)
 struct FGridData
 {
 	GENERATED_BODY()
@@ -65,9 +65,11 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y);
-	
 	TArray<FGridData*> GetEmptyInRow(int32 X);
-	FGridData* GetDataAt(int32 X, int32 Y);
+	UFUNCTION()
+	bool IsGridOccupiedAt(int32 X, int32 Y);
+	UFUNCTION()
+	void SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle);
 
 public:
 	// Called every frame
