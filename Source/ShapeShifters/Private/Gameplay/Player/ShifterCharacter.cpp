@@ -3,11 +3,14 @@
 
 #include "ShapeShifters/Public/Gameplay/Player/ShifterCharacter.h"
 
-#include "Gameplay/Player/GameCamera.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "Camera/CameraComponent.h"
 #include "Gameplay/World/ShifterSpawner.h"
 #include "Kismet/GameplayStatics.h"
 
 
+class UEnhancedInputLocalPlayerSubsystem;
 // Sets default values
 AShifterCharacter::AShifterCharacter()
 {
@@ -18,6 +21,8 @@ AShifterCharacter::AShifterCharacter()
 	SetRootComponent(RootComp);
 	ShapeMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShapeMesh"));
 	ShapeMesh->SetupAttachment(GetRootComponent());
+	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
+	ViewCamera->SetupAttachment(GetRootComponent());
 	LaneIndex = 0;
 }
 
@@ -26,6 +31,43 @@ void AShifterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	TargetLocation = GetActorLocation();
+}
+
+void AShifterCharacter::PawnClientRestart()
+{
+	Super::PawnClientRestart();
+
+	if(APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if(UEnhancedInputLocalPlayerSubsystem* InputSystem = PC->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		{
+			InputSystem->AddMappingContext(InputMappingContext, 1);
+		}
+	}
+}
+
+void AShifterCharacter::HandleLaneMovement(const FInputActionInstance& Action)
+{
+	float InputData = Action.GetValue().Get<float>();
+	if(InputData < 0.f)
+	{
+		StepLeft();
+		
+	}else if(InputData > 0.f)
+	{
+		StepRight();
+	}
+}
+
+void AShifterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(LaneChangeInputLeft, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleLaneMovement);
+		EnhancedInputComponent->BindAction(LaneChangeInputRight, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleLaneMovement);
+	}
 }
 
 // Called every frame
@@ -43,9 +85,13 @@ void AShifterCharacter::Tick(float DeltaTime)
 	
 }
 
-void AShifterCharacter::SetCameraActor(AGameCamera* Cam)
+AShifterSpawner* AShifterCharacter::GetSpawner()
 {
-	ControllingCamera = Cam;
+	if(AShifterSpawner* Spawner = Cast<AShifterSpawner>(UGameplayStatics::GetActorOfClass(GetWorld(), AShifterSpawner::StaticClass())))
+	{
+		return Spawner;
+	}
+	return nullptr;
 }
 
 void AShifterCharacter::StepLeft()
@@ -53,17 +99,17 @@ void AShifterCharacter::StepLeft()
 	if(LaneIndex > 0)
 	{
 		FVector Loc = GetActorLocation();
-		Loc.Y = ControllingCamera->GetSpawner()->GetGridLocationByIndex(--LaneIndex).Y;
+		Loc.Y = GetSpawner()->GetGridLocationByIndex(--LaneIndex).Y;
 		TargetLocation = Loc;
 	}
 }
 
 void AShifterCharacter::StepRight()
 {
-	if(LaneIndex < ControllingCamera->GetSpawner()->GridWidth-1)
+	if(LaneIndex < GetSpawner()->GridWidth-1)
 	{
 		FVector Loc = GetActorLocation();
-		Loc.Y = ControllingCamera->GetSpawner()->GetGridLocationByIndex(++LaneIndex).Y;
+		Loc.Y = GetSpawner()->GetGridLocationByIndex(++LaneIndex).Y;
 		
 		TargetLocation = Loc;
 	}

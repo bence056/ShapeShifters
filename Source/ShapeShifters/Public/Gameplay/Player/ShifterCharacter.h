@@ -6,10 +6,15 @@
 #include "GameFramework/Character.h"
 #include "ShifterCharacter.generated.h"
 
+class AShifterSpawner;
+struct FInputActionInstance;
+class UInputMappingContext;
+class UCameraComponent;
+class UInputAction;
 class AGameCamera;
 
 UCLASS()
-class SHAPESHIFTERS_API AShifterCharacter : public AActor
+class SHAPESHIFTERS_API AShifterCharacter : public APawn
 {
 	GENERATED_BODY()
 
@@ -25,6 +30,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int32 LaneIndex;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UCameraComponent* ViewCamera;
+
+	UPROPERTY(EditDefaultsOnly)
+	UInputMappingContext* InputMappingContext;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
+	UInputAction* LaneChangeInputLeft;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
+	UInputAction* LaneChangeInputRight;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -32,17 +48,19 @@ protected:
 	UPROPERTY()
 	FVector TargetLocation;
 
-	UPROPERTY()
-	AGameCamera* ControllingCamera;
+	virtual void PawnClientRestart() override;
+	UFUNCTION()
+	void HandleLaneMovement(const FInputActionInstance& Action);
+
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
-	UFUNCTION()
-	void SetCameraActor(AGameCamera* Cam);
-	
+	UFUNCTION(BlueprintCallable)
+	AShifterSpawner* GetSpawner();
 	UFUNCTION(BlueprintCallable)
 	void StepLeft();
 	UFUNCTION(BlueprintCallable)
