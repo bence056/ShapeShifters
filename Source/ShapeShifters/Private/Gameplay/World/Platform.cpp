@@ -97,11 +97,21 @@ void APlatform::GeneratePlatformContents()
 				int32 ArrayStart = FMath::Min(StartCell, EndCell);
 				int32 ArrayEnd = FMath::Max(StartCell, EndCell);
 				
-				for(int32 j=ArrayStart; j<=ArrayEnd; j++)
-				{
-					AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(RowCount, j), FRotator::ZeroRotator);
-					Obstacle->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-				}
+				// for(int32 j=ArrayStart; j<=ArrayEnd; j++)
+				// {
+				// 	AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(RowCount, j), FRotator::ZeroRotator);
+				// 	Obstacle->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				// }
+
+				AObstacle* Obstacle1 = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(0, 0), FRotator::ZeroRotator);
+				Obstacle1->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				AObstacle* Obstacle2 = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(0, 7), FRotator::ZeroRotator);
+				Obstacle2->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				AObstacle* Obstacle3 = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(7, 0), FRotator::ZeroRotator);
+				Obstacle3->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				AObstacle* Obstacle4 = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(7, 7), FRotator::ZeroRotator);
+				Obstacle4->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				
 				break;
 			}
 		
