@@ -4,8 +4,16 @@
 #include "Gameplay/World/Platform.h"
 
 #include "Framework/ShiftersGameMode.h"
+#include "Gameplay/Obstacles/Obstacle.h"
 #include "Kismet/GameplayStatics.h"
 
+
+FGridData::FGridData()
+{
+	CellX = 0;
+	CellY = 0;
+	ContainedObstacle = nullptr;
+}
 
 // Sets default values
 APlatform::APlatform()
@@ -15,6 +23,8 @@ APlatform::APlatform()
 
 	PlatformMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlatformMesh"));
 	SetRootComponent(PlatformMesh);
+
+	MaxSpawnTrials = 5;
 }
 
 // Called when the game starts or when spawned
@@ -35,6 +45,19 @@ void APlatform::FellOutOfWorld(const UDamageType& dmgType)
 	Super::FellOutOfWorld(dmgType);
 }
 
+FVector APlatform::GetGridLocation(int32 X, int32 Y)
+{
+	FVector Loc = GetActorLocation();
+	//get bottom left corner.
+	Loc -= FVector(1,1,0) * 1500.f;
+	float CellSize = 3000.f / 8.f;
+	//adjust to center.
+	Loc += FVector(CellSize/2, CellSize/2, 0.f);
+	//select the grid.
+	Loc += FVector(X*CellSize, Y*CellSize, 0.f);
+	return Loc;
+}
+
 // Called every frame
 void APlatform::Tick(float DeltaTime)
 {
@@ -47,5 +70,42 @@ void APlatform::Tick(float DeltaTime)
 void APlatform::DestroyPlatformAndContents()
 {
 	Destroy();
+}
+
+void APlatform::GeneratePlatformContents()
+{
+	for(int i=0; i<MaxSpawnTrials; i++)
+	{
+		TArray<EPlatformContentTypes> PlatformContentTypes;
+		ObstacleClasses.GetKeys(PlatformContentTypes);
+		if(PlatformContentTypes.Num() > 0)
+		{
+			int32 RandomSelect = FMath::RandRange(0, PlatformContentTypes.Num()-1);
+			EPlatformContentTypes Type = PlatformContentTypes[RandomSelect];
+
+			//spawn wall cuz why not.
+			Type = EPlatformContentTypes::Wall;
+			if(Type == EPlatformContentTypes::Wall)
+			{
+				//select a row to spawn the wall in.
+				int32 RowCount = FMath::RandRange(0, 7);
+				//select a start and an end cell.
+				int32 StartCell = FMath::RandRange(0, 7);
+				int32 EndCell = FMath::RandRange(0, 7);
+
+				//Generate Wall.
+				int32 ArrayStart = FMath::Min(StartCell, EndCell);
+				int32 ArrayEnd = FMath::Max(StartCell, EndCell);
+				
+				for(int32 j=ArrayStart; j<=ArrayEnd; j++)
+				{
+					AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(RowCount, j), FRotator::ZeroRotator);
+					Obstacle->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+				}
+				break;
+			}
+		
+		}
+	}
 }
 

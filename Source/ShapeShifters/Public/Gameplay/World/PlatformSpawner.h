@@ -23,6 +23,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UBoxComponent* SpawnArea;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int32 MaxPlatformCount = 10;
+	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

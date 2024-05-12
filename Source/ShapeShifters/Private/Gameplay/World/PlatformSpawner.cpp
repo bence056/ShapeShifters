@@ -57,8 +57,8 @@ void APlatformSpawner::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	//spawn platforms
-
-	if(PlatformClass && PlatformsInArea.Num() < 10)
+	
+	if(PlatformClass && PlatformsInArea.Num() < MaxPlatformCount)
 	{
 		FVector SpawnLoc = GetActorLocation();
 		SpawnLoc.X -= SpawnArea->GetScaledBoxExtent().X;
@@ -69,8 +69,10 @@ void APlatformSpawner::Tick(float DeltaTime)
 			SpawnLoc.X += 1500.f;
 		}
 
-		GetWorld()->SpawnActor<APlatform>(PlatformClass, SpawnLoc, FRotator::ZeroRotator);
-		
+		//spawn the platform
+		APlatform* Platform = GetWorld()->SpawnActor<APlatform>(PlatformClass, SpawnLoc, FRotator::ZeroRotator);
+		Platform->LinkedPlatform = PlatformsInArea[PlatformsInArea.Num()-1];
+		Platform->GeneratePlatformContents();
 	}
 	
 }
