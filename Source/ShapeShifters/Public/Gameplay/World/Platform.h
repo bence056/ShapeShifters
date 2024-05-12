@@ -65,6 +65,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y);
+	
+	TArray<FGridData*> GetEmptyInRow(int32 X);
+	FGridData* GetDataAt(int32 X, int32 Y);
 
 public:
 	// Called every frame

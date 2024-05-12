@@ -32,6 +32,17 @@ void APlatform::BeginPlay()
 {
 	Super::BeginPlay();
 
+	for(int32 x=0; x<8; x++) {
+		for(int32 y=0; y<8; y++)
+		{
+			FGridData GD = FGridData();
+			GD.CellX = x;
+			GD.CellY = y;
+			GD.ContainedObstacle = nullptr;
+			GridData.Add(GD);
+		}
+	}
+	
 	if(AShiftersGameMode* GMode = Cast<AShiftersGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
 		Speed = GMode->PlatformMovementSpeed;
@@ -67,6 +78,31 @@ void APlatform::SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y)
 	Entry.CellY = Y;
 	Entry.ContainedObstacle = Obstacle;
 	GridData.Add(Entry);
+}
+
+TArray<FGridData*> APlatform::GetEmptyInRow(int32 X)
+{
+	TArray<FGridData*> FreeCells;
+	for(auto& Entry : GridData)
+	{
+		if(Entry.CellX == X && !Entry.ContainedObstacle)
+		{
+			FreeCells.Add(&Entry);
+		}
+	}
+	return FreeCells;
+}
+
+FGridData* APlatform::GetDataAt(int32 X, int32 Y)
+{
+	for(auto& Entry : GridData)
+	{
+		if(Entry.CellX == X && Entry.CellY == Y)
+		{
+			return &Entry;
+		}
+	}
+	return nullptr;
 }
 
 // Called every frame
@@ -108,19 +144,82 @@ void APlatform::GeneratePlatformContents()
 				//select a row to spawn the wall in.
 				int32 RowCount = FMath::RandRange(0, 7);
 				//select a start and an end cell.
-				int32 StartCell = FMath::RandRange(0, 7);
-				int32 EndCell = FMath::RandRange(0, 7);
 
-				//Generate Wall.
-				int32 ArrayStart = FMath::Min(StartCell, EndCell);
-				int32 ArrayEnd = FMath::Max(StartCell, EndCell);
-				
-				for(int32 j=ArrayStart; j<=ArrayEnd; j++)
+				TArray<FGridData*> FreeInRow = GetEmptyInRow(RowCount);
+
+				//only allowed to spawn if there will be at least 1 gap.
+				if(FreeInRow.Num() >= 2)
 				{
-					SpawnObstacle(Type, RowCount, j);
+					TArray<int32> PossibleWallStarts;
+					for(auto& Free : FreeInRow)
+					{
+						PossibleWallStarts.Add(Free->CellY);
+					}
+					int32 StartCell = PossibleWallStarts[FMath::RandRange(0, PossibleWallStarts.Num()-1)];
+					TArray<int32> PossibleWallEnds;
+					//add the starting one (so we can and where we started);
+					PossibleWallEnds.Add(StartCell);
+					//check left:
+					bool bFreeSlot = true;
+					int32 locY = StartCell;
+					//remaining free slots on the entire line (we added the start, so its -1)
+					int32 FreeSlots = FreeInRow.Num()-1;
+					while (bFreeSlot)
+					{
+						if(locY != 0)
+						{
+							//step one left.
+							FGridData* CellLeft = GetDataAt(RowCount, --locY);
+							if(CellLeft && !CellLeft->ContainedObstacle && FreeSlots > 1)
+							{
+								PossibleWallEnds.Add(CellLeft->CellY);
+								FreeSlots--;
+							}else
+							{
+								bFreeSlot = false;
+							}
+						}else
+						{
+							bFreeSlot = false;
+						}
+					}
+					//check right
+					bFreeSlot = true;
+					locY = StartCell;
+					FreeSlots = FreeInRow.Num()-1;
+					while (bFreeSlot)
+					{
+						if(locY != 7)
+						{
+							//step one left.
+							FGridData* CellRight = GetDataAt(RowCount, ++locY);
+							if(CellRight && !CellRight->ContainedObstacle && FreeSlots > 1)
+							{
+								PossibleWallEnds.Add(CellRight->CellY);
+								FreeSlots--;
+							}else
+							{
+								bFreeSlot = false;
+							}
+						}else
+						{
+							bFreeSlot = false;
+						}
+					}
+					int32 EndCell = PossibleWallEnds[FMath::RandRange(0, PossibleWallEnds.Num()-1)];
+
+					//Generate Wall.
+				
+					int32 ArrayStart = FMath::Min(StartCell, EndCell);
+					int32 ArrayEnd = FMath::Max(StartCell, EndCell);
+				
+					for(int32 j=ArrayStart; j<=ArrayEnd; j++)
+					{
+						SpawnObstacle(Type, RowCount, j);
+					}
 				}
 				
-				break;
+				
 			}
 		
 		}

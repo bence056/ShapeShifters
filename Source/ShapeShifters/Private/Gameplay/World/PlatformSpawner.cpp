@@ -66,7 +66,7 @@ void APlatformSpawner::Tick(float DeltaTime)
 		if(PlatformsInArea.Num() > 0)
 		{
 			SpawnLoc = PlatformsInArea[PlatformsInArea.Num()-1]->GetActorLocation();
-			SpawnLoc.X += 3000.f;
+			SpawnLoc.X += 3100.f;
 		}
 
 		//spawn the platform
