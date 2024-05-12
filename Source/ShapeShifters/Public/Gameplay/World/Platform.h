@@ -48,6 +48,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TMap<EPlatformContentTypes, TSubclassOf<AObstacle>> ObstacleClasses;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int32 WallMinSize;
+	
 	
 protected:
 	// Called when the game starts or when spawned
@@ -70,6 +74,9 @@ protected:
 	bool IsGridOccupiedAt(int32 X, int32 Y);
 	UFUNCTION()
 	void SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle);
+
+	UFUNCTION()
+	void SpawnWall();
 
 public:
 	// Called every frame
