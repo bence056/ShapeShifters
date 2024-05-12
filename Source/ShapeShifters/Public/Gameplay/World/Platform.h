@@ -63,6 +63,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	FVector GetGridLocation(int32 X, int32 Y);
 
+	UFUNCTION(BlueprintCallable)
+	void SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y);
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

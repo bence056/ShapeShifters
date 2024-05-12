@@ -55,7 +55,7 @@ void APlatformSpawner::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AA
 void APlatformSpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	//spawn platforms
 	
 	if(PlatformClass && PlatformsInArea.Num() < MaxPlatformCount)
@@ -71,6 +71,7 @@ void APlatformSpawner::Tick(float DeltaTime)
 
 		//spawn the platform
 		APlatform* Platform = GetWorld()->SpawnActor<APlatform>(PlatformClass, SpawnLoc, FRotator::ZeroRotator);
+		PlatformsInArea.Add(Platform);
 		Platform->LinkedPlatform = PlatformsInArea[PlatformsInArea.Num()-1];
 		Platform->GeneratePlatformContents();
 	}
