@@ -5,6 +5,7 @@
 
 #include "Framework/ShiftersGameMode.h"
 #include "Gameplay/Obstacles/Obstacle.h"
+#include "Gameplay/Obstacles/WallObstacle.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -72,6 +73,13 @@ FVector APlatform::GetGridLocation(int32 X, int32 Y)
 
 void APlatform::SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y)
 {
+	//delete alr existing obj.
+	FGridData* TgtGrid = GetCellDataAt(X,Y);
+	if(TgtGrid && TgtGrid->ContainedObstacle)
+	{
+		TgtGrid->ContainedObstacle->Destroy();
+		TgtGrid->ContainedObstacle = nullptr;
+	}
 	AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(X, Y), FRotator::ZeroRotator);
 	Obstacle->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	Obstacle->OwningPlatform = this;
@@ -114,7 +122,20 @@ void APlatform::SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle)
 	}	
 }
 
-void APlatform::SpawnWall()
+TArray<FGridData*> APlatform::GetCellsWithObstacle(TSubclassOf<AObstacle> ClassFilter)
+{
+	TArray<FGridData*> RetArray;
+	for(auto& Cell : GridData)
+	{
+		if(Cell.ContainedObstacle && Cell.ContainedObstacle->GetClass()->IsChildOf(ClassFilter))
+		{
+			RetArray.Add(&Cell);
+		}
+	}
+	return RetArray;
+}
+
+bool APlatform::SpawnWall()
 {
 	//select a row to spawn the wall in.
 	int32 RowCount = FMath::RandRange(0, 7);
@@ -194,8 +215,38 @@ void APlatform::SpawnWall()
 			{
 				SpawnObstacle(EPlatformContentTypes::Wall, RowCount, j);
 			}
+			return true;
 		}
 	}
+	return false;
+}
+
+bool APlatform::TrySpawnBreakableWall()
+{
+	TArray<FGridData*> WallCells = GetCellsWithObstacle(AWallObstacle::StaticClass());
+	if(WallCells.Num() > 0)
+	{
+		//adjust for non edge & surrounded walls.
+		TArray<FGridData*> CorrectWalls;
+		for(auto& Wall : WallCells)
+		{
+			if(Wall->CellY > 0 && Wall->CellY < 7 &&
+				WallCells.Contains(GetCellDataAt(Wall->CellX, Wall->CellY-1)) &&
+				WallCells.Contains(GetCellDataAt(Wall->CellX, Wall->CellY+1)))
+			{
+				CorrectWalls.Add(Wall);
+			}
+		}
+		if(CorrectWalls.Num() > 0)
+		{
+			FGridData* SelectedCell = CorrectWalls[FMath::RandRange(0, CorrectWalls.Num()-1)];
+			SpawnObstacle(EPlatformContentTypes::Breakable, SelectedCell->CellX, SelectedCell->CellY);
+			return true;
+		}
+	}
+	return false;
+	
+	
 }
 
 
@@ -230,12 +281,35 @@ void APlatform::GeneratePlatformContents()
 		{
 			int32 RandomSelect = FMath::RandRange(0, PlatformContentTypes.Num()-1);
 			EPlatformContentTypes Type = PlatformContentTypes[RandomSelect];
-			if(Type == EPlatformContentTypes::Wall)
-			{	
-				SpawnWall();	
+			bool bSuccess = false;
+			for(int t=0; t<GetTypeIterations(Type); t++)
+			{
+				if(Type == EPlatformContentTypes::Wall)
+				{	
+					bSuccess = SpawnWall();	
+				}else if(Type == EPlatformContentTypes::Breakable)
+				{
+					bSuccess = TrySpawnBreakableWall();
+				}
 			}
-		
 		}
 	}
 }
 
+FGridData* APlatform::GetCellDataAt(int32 X, int32 Y)
+{
+	for(auto& Cell : GridData)
+	{
+		if(Cell.CellX == X && Cell.CellY == Y)
+		{
+			return &Cell;
+		}
+	}
+	return nullptr;
+}
+
+int32 APlatform::GetTypeIterations(EPlatformContentTypes Type)
+{
+	if(TypeSpawnIterations.Contains(Type)) return *TypeSpawnIterations.Find(Type);
+	return 1;
+}

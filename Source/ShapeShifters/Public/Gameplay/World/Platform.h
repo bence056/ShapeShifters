@@ -11,7 +11,8 @@ class AObstacle;
 UENUM()
 enum class EPlatformContentTypes : uint8
 {
-	Wall
+	Wall,
+	Breakable
 };
 
 USTRUCT(Blueprintable, BlueprintType)
@@ -47,6 +48,9 @@ public:
 	int32 MaxSpawnTrials;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TMap<EPlatformContentTypes, int32> TypeSpawnIterations;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TMap<EPlatformContentTypes, TSubclassOf<AObstacle>> ObstacleClasses;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -74,9 +78,18 @@ protected:
 	bool IsGridOccupiedAt(int32 X, int32 Y);
 	UFUNCTION()
 	void SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle);
+	
+	TArray<FGridData*> GetCellsWithObstacle(TSubclassOf<AObstacle> ClassFilter);
+	FGridData* GetCellDataAt(int32 X, int32 Y);
 
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetTypeIterations(EPlatformContentTypes Type);
+	
 	UFUNCTION()
-	void SpawnWall();
+	bool SpawnWall();
+	UFUNCTION()
+	bool TrySpawnBreakableWall();
 
 public:
 	// Called every frame
