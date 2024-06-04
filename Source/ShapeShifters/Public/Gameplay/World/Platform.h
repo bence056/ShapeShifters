@@ -48,6 +48,9 @@ public:
 	int32 MaxSpawnTrials;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int32 MinObstacleDepthDistance;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TMap<EPlatformContentTypes, int32> TypeSpawnIterations;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -55,7 +58,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int32 WallMinSize;
-	
 	
 protected:
 	// Called when the game starts or when spawned
@@ -91,6 +93,7 @@ protected:
 	UFUNCTION()
 	bool TrySpawnBreakableWall();
 
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -99,5 +102,8 @@ public:
 	void DestroyPlatformAndContents();
 	UFUNCTION(BlueprintCallable)
 	void GeneratePlatformContents();
+	
+	UFUNCTION(BlueprintCallable)
+	int32 GetMinObstacleIndex();
 	
 };

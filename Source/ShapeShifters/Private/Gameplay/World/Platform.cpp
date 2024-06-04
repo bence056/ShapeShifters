@@ -24,7 +24,6 @@ APlatform::APlatform()
 
 	PlatformMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlatformMesh"));
 	SetRootComponent(PlatformMesh);
-
 	MaxSpawnTrials = 5;
 	WallMinSize = 2;
 }
@@ -83,6 +82,8 @@ void APlatform::SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y)
 	AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(X, Y), FRotator::ZeroRotator);
 	Obstacle->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	Obstacle->OwningPlatform = this;
+	Obstacle->PosX = X;
+	Obstacle->PosY = Y;
 	SetDataAt(X, Y, Obstacle);
 }
 
@@ -138,86 +139,90 @@ TArray<FGridData*> APlatform::GetCellsWithObstacle(TSubclassOf<AObstacle> ClassF
 bool APlatform::SpawnWall()
 {
 	//select a row to spawn the wall in.
-	int32 RowCount = FMath::RandRange(0, 7);
-	//select a start and an end cell.
-
-	TArray<FGridData*> FreeInRow = GetEmptyInRow(RowCount);
-
-	//only allowed to spawn if there will be at least 1 gap.
-	if(FreeInRow.Num() >= 2)
+	if(GetMinObstacleIndex() >= 0)
 	{
-		TArray<int32> PossibleWallStarts;
-		for(auto& Free : FreeInRow)
-		{
-			PossibleWallStarts.Add(Free->CellY);
-		}
-		int32 StartCell = PossibleWallStarts[FMath::RandRange(0,PossibleWallStarts.Num()-1)];
-		TArray<int32> PossibleWallEnds;
-		//add the starting one (so we can and where we started);
-		PossibleWallEnds.Add(StartCell);
-		//check left:
-		bool bFreeSlot = true;
-		int32 locY = StartCell;
-		//remaining free slots on the entire line (we added the start, so its -1)
-		int32 FreeSlots = FreeInRow.Num()-1;
-		while (bFreeSlot)
-		{
-			if(locY != 0)
-			{
-				//step one left.
-				if(!IsGridOccupiedAt(RowCount, --locY) && FreeSlots > 1)
-				{
-					PossibleWallEnds.Add(locY);
-					FreeSlots--;
-				}else
-				{
-					bFreeSlot = false;
-				}
-			}else
-			{
-				bFreeSlot = false;
-			}
-		}
-		//check right
-		bFreeSlot = true;
-		locY = StartCell;
-		FreeSlots = FreeInRow.Num()-1;
-		while (bFreeSlot)
-		{
-			if(locY != 7)
-			{
-				//step one right.
-				if(!IsGridOccupiedAt(RowCount, ++locY) && FreeSlots > 1)
-				{
-					PossibleWallEnds.Add(locY);
-					FreeSlots--;
-				}else
-				{
-					bFreeSlot = false;
-				}
-			}else
-			{
-				bFreeSlot = false;
-			}
-		}
-		int32 EndCell = PossibleWallEnds[FMath::RandRange(0, PossibleWallEnds.Num()-1)];
-					
-					
-		//Generate Wall.
-				
-		int32 ArrayStart = FMath::Min(StartCell, EndCell);
-		int32 ArrayEnd = FMath::Max(StartCell, EndCell);
+		int32 RowCount = FMath::RandRange(GetMinObstacleIndex(), 7);
+		//select a start and an end cell.
 
-		//check for wall min
-		if(ArrayEnd-ArrayStart+1 > WallMinSize)
+		TArray<FGridData*> FreeInRow = GetEmptyInRow(RowCount);
+
+		//only allowed to spawn if there will be at least 1 gap.
+		if(FreeInRow.Num() >= 2)
 		{
-			for(int32 j=ArrayStart; j<=ArrayEnd; j++)
+			TArray<int32> PossibleWallStarts;
+			for(auto& Free : FreeInRow)
 			{
-				SpawnObstacle(EPlatformContentTypes::Wall, RowCount, j);
+				PossibleWallStarts.Add(Free->CellY);
 			}
-			return true;
+			int32 StartCell = PossibleWallStarts[FMath::RandRange(0,PossibleWallStarts.Num()-1)];
+			TArray<int32> PossibleWallEnds;
+			//add the starting one (so we can and where we started);
+			PossibleWallEnds.Add(StartCell);
+			//check left:
+			bool bFreeSlot = true;
+			int32 locY = StartCell;
+			//remaining free slots on the entire line (we added the start, so its -1)
+			int32 FreeSlots = FreeInRow.Num()-1;
+			while (bFreeSlot)
+			{
+				if(locY != 0)
+				{
+					//step one left.
+					if(!IsGridOccupiedAt(RowCount, --locY) && FreeSlots > 1)
+					{
+						PossibleWallEnds.Add(locY);
+						FreeSlots--;
+					}else
+					{
+						bFreeSlot = false;
+					}
+				}else
+				{
+					bFreeSlot = false;
+				}
+			}
+			//check right
+			bFreeSlot = true;
+			locY = StartCell;
+			FreeSlots = FreeInRow.Num()-1;
+			while (bFreeSlot)
+			{
+				if(locY != 7)
+				{
+					//step one right.
+					if(!IsGridOccupiedAt(RowCount, ++locY) && FreeSlots > 1)
+					{
+						PossibleWallEnds.Add(locY);
+						FreeSlots--;
+					}else
+					{
+						bFreeSlot = false;
+					}
+				}else
+				{
+					bFreeSlot = false;
+				}
+			}
+			int32 EndCell = PossibleWallEnds[FMath::RandRange(0, PossibleWallEnds.Num()-1)];
+					
+					
+			//Generate Wall.
+				
+			int32 ArrayStart = FMath::Min(StartCell, EndCell);
+			int32 ArrayEnd = FMath::Max(StartCell, EndCell);
+
+			//check for wall min
+			if(ArrayEnd-ArrayStart+1 > WallMinSize)
+			{
+				for(int32 j=ArrayStart; j<=ArrayEnd; j++)
+				{
+					SpawnObstacle(EPlatformContentTypes::Wall, RowCount, j);
+				}
+				return true;
+			}
 		}
 	}
+	
 	return false;
 }
 
@@ -294,6 +299,11 @@ void APlatform::GeneratePlatformContents()
 			}
 		}
 	}
+}
+
+int32 APlatform::GetMinObstacleIndex()
+{
+	return 0;
 }
 
 FGridData* APlatform::GetCellDataAt(int32 X, int32 Y)

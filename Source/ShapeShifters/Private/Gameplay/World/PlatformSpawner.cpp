@@ -46,7 +46,7 @@ void APlatformSpawner::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	{
 		if(!PlatformsInArea.Contains(PlatformActor))
 		{
-			PlatformsInArea.Add(PlatformActor);
+			// PlatformsInArea.Add(PlatformActor);
 		}
 	}
 }
@@ -71,9 +71,13 @@ void APlatformSpawner::Tick(float DeltaTime)
 
 		//spawn the platform
 		APlatform* Platform = GetWorld()->SpawnActor<APlatform>(PlatformClass, SpawnLoc, FRotator::ZeroRotator);
+		if(PlatformsInArea.Num() >= 1)
+		{
+			Platform->LinkedPlatform = PlatformsInArea[PlatformsInArea.Num()-1];
+		}
 		PlatformsInArea.Add(Platform);
-		Platform->LinkedPlatform = PlatformsInArea[PlatformsInArea.Num()-1];
 		Platform->GeneratePlatformContents();
+		
 	}
 	
 }

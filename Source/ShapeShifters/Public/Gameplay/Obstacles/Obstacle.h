@@ -20,6 +20,11 @@ public:
 	// Sets default values for this actor's properties
 	AObstacle();
 
+	UPROPERTY()
+	int32 PosX;
+	UPROPERTY()
+	int32 PosY;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float HideSlideDistance;
 
