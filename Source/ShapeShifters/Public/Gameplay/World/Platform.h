@@ -12,7 +12,32 @@ UENUM()
 enum class EPlatformContentTypes : uint8
 {
 	Wall,
-	Breakable
+	Breakable,
+	Laser,
+	Spike,
+	Turret
+};
+
+USTRUCT(BlueprintType, Blueprintable)
+struct FCellSpawnData
+{
+	GENERATED_BODY()
+
+	FCellSpawnData();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 7, Delta = 1))
+	int32 CellX;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 7, Delta = 1))
+	int32 CellY;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bRepeating;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 7, Delta = 1, EditCondition = "bRepeating", EditConditionHides = true))
+	int32 RepX;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 7, Delta = 1, EditCondition = "bRepeating", EditConditionHides = true))
+	int32 RepY;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EPlatformContentTypes Type;
+	
 };
 
 USTRUCT(Blueprintable, BlueprintType)
@@ -44,20 +69,9 @@ public:
 	UStaticMeshComponent* PlatformMesh;
 	UPROPERTY()
 	APlatform* LinkedPlatform;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 MaxSpawnTrials;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 MinObstacleDepthDistance;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TMap<EPlatformContentTypes, int32> TypeSpawnIterations;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TMap<EPlatformContentTypes, TSubclassOf<AObstacle>> ObstacleClasses;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 WallMinSize;
+	TArray<FCellSpawnData> PlatformContent;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -85,15 +99,6 @@ protected:
 	FGridData* GetCellDataAt(int32 X, int32 Y);
 
 
-	UFUNCTION(BlueprintCallable)
-	int32 GetTypeIterations(EPlatformContentTypes Type);
-	
-	UFUNCTION()
-	bool SpawnWall();
-	UFUNCTION()
-	bool TrySpawnBreakableWall();
-
-
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -102,8 +107,5 @@ public:
 	void DestroyPlatformAndContents();
 	UFUNCTION(BlueprintCallable)
 	void GeneratePlatformContents();
-	
-	UFUNCTION(BlueprintCallable)
-	int32 GetMinObstacleIndex();
 	
 };

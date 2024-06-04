@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "ShiftersGameMode.generated.h"
 
+class AObstacle;
+enum class EPlatformContentTypes : uint8;
 /**
  * 
  */
@@ -20,5 +22,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float PlatformMovementSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TMap<EPlatformContentTypes, TSubclassOf<AObstacle>> ObstacleClasses;
 	
 };

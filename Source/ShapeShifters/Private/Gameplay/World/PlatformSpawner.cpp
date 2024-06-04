@@ -57,6 +57,24 @@ void APlatformSpawner::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	//spawn platforms
+
+	if(PlatformClasses.Num() == 0) return;
+
+	TSubclassOf<APlatform> PlatformClass = AActor::StaticClass();
+	TArray<float> Weights;
+	PlatformClasses.GenerateValueArray(Weights);
+	float SumWeight = 0;
+	for (auto Weight : Weights) SumWeight+=Weight;
+	float RandW = FMath::RandRange(0.f, SumWeight);
+	for(auto& Pair : PlatformClasses.Array())
+	{
+		if(RandW < Pair.Value)
+		{
+			PlatformClass = Pair.Key;
+			break;
+		}
+		RandW -= Pair.Value;
+	}
 	
 	if(PlatformClass && PlatformsInArea.Num() < MaxPlatformCount)
 	{
