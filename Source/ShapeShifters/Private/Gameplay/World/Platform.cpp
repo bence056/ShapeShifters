@@ -8,12 +8,6 @@
 #include "Gameplay/Obstacles/WallObstacle.h"
 #include "Kismet/GameplayStatics.h"
 
-
-FCellSpawnData::FCellSpawnData(): CellX(0), CellY(0), bRepeating(false), RepX(0), RepY(0),
-                                  Type(EPlatformContentTypes::Wall)
-{
-}
-
 FGridData::FGridData()
 {
 	CellX = 0;
@@ -29,6 +23,7 @@ APlatform::APlatform()
 
 	PlatformMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlatformMesh"));
 	SetRootComponent(PlatformMesh);
+	bUseCustomSeed = false;
 }
 
 // Called when the game starts or when spawned
@@ -143,6 +138,8 @@ TArray<FGridData*> APlatform::GetCellsWithObstacle(TSubclassOf<AObstacle> ClassF
 }
 
 
+
+
 // Called every frame
 void APlatform::Tick(float DeltaTime)
 {
@@ -166,22 +163,66 @@ void APlatform::DestroyPlatformAndContents()
 
 void APlatform::GeneratePlatformContents()
 {
-	for(auto& Content : PlatformContent)
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		if(Content.bRepeating)
+		//phase 1:
+		//generate the damn walls.
+		
+		FRandomStream Stream = FRandomStream(CustomSeed);
+		if(!bUseCustomSeed) Stream.GenerateNewSeed();
+
+		for(int32 Rep =0; Rep<ShiftersGameMode->MaxWallSpawnTrials; Rep++)
 		{
-			for(int32 x=Content.CellX; x<=Content.CellX + Content.RepX; x++)
+			TArray<int32> PotentialRows;
+			for(int32 i=0; i<8; i++)
 			{
-				for(int32 y=Content.CellY; y<=Content.CellY + Content.RepY; y++)
-				{
-					SpawnObstacle(Content.Type, x,y);
-				}
+				if(!BlockedRows.Contains(i)) PotentialRows.Add(i);
 			}
-		}else
-		{
-			SpawnObstacle(Content.Type, Content.CellX, Content.CellY);
+			if(PotentialRows.Num() > 0)
+			{
+				int32 SelectedRow = PotentialRows[Stream.RandRange(0, PotentialRows.Num()-1)];
+				int32 SelectedWidth = Stream.RandRange(ShiftersGameMode->MinimumWallWidth, ShiftersGameMode->MaximumWallWidth);
+				if(SelectedWidth >= 1)
+				{
+					int32 MaxWallColumn = 8-SelectedWidth;
+					int32 StartingCol = Stream.RandRange(0, MaxWallColumn);
+					
+					for(int32 i=StartingCol; i<StartingCol+SelectedWidth; i++)
+					{
+						SpawnObstacle(EPlatformContentTypes::Wall, SelectedRow, i);
+					}
+					
+					SetWallBlocks(SelectedRow);
+					
+					
+				}
+				
+			}
+			
 		}
 		
+		
+
+		
+		
+	}
+}
+
+void APlatform::SetWallBlocks(int32 NewWallRow)
+{
+	// add blocks;
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		for(int32 i=NewWallRow-ShiftersGameMode->MinimumWallGap; i<=NewWallRow+ShiftersGameMode->MinimumWallGap; i++)
+		{
+			if(i>=0 && i<=7)
+			{
+				if(!BlockedRows.Contains(i)) BlockedRows.Add(i);
+			}else if(i>7)
+			{
+				if(!PreReservedRows.Contains(i)) PreReservedRows.Add(i);
+			}
+		}
 	}
 }
 
@@ -196,3 +237,4 @@ FGridData* APlatform::GetCellDataAt(int32 X, int32 Y)
 	}
 	return nullptr;
 }
+

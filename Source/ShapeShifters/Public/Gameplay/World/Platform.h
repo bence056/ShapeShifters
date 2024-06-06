@@ -18,28 +18,6 @@ enum class EPlatformContentTypes : uint8
 	Turret
 };
 
-USTRUCT(BlueprintType, Blueprintable)
-struct FCellSpawnData
-{
-	GENERATED_BODY()
-
-	FCellSpawnData();
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 7, Delta = 1))
-	int32 CellX;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 7, Delta = 1))
-	int32 CellY;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bRepeating;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 7, Delta = 1, EditCondition = "bRepeating", EditConditionHides = true))
-	int32 RepX;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, ClampMax = 7, Delta = 1, EditCondition = "bRepeating", EditConditionHides = true))
-	int32 RepY;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EPlatformContentTypes Type;
-	
-};
-
 USTRUCT(Blueprintable, BlueprintType)
 struct FGridData
 {
@@ -70,8 +48,11 @@ public:
 	UPROPERTY()
 	APlatform* LinkedPlatform;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TArray<FCellSpawnData> PlatformContent;
+	UPROPERTY()
+	TArray<int32> BlockedRows;
+	UPROPERTY()
+	TArray<int32> PreReservedRows;
+
 	
 protected:
 	// Called when the game starts or when spawned
@@ -86,7 +67,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	FVector GetGridLocation(int32 X, int32 Y);
-
+public:
 	UFUNCTION(BlueprintCallable)
 	void SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y);
 	TArray<FGridData*> GetEmptyInRow(int32 X);
@@ -97,6 +78,15 @@ protected:
 	
 	TArray<FGridData*> GetCellsWithObstacle(TSubclassOf<AObstacle> ClassFilter);
 	FGridData* GetCellDataAt(int32 X, int32 Y);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bUseCustomSeed;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "bUseCustomSeed", EditConditionHides = true))
+	int32 CustomSeed;
+
+	UFUNCTION()
+	void SetWallBlocks(int32 NewWallRow);
+	
 
 
 public:

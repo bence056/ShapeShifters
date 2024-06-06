@@ -93,6 +93,23 @@ void APlatformSpawner::Tick(float DeltaTime)
 		{
 			Platform->LinkedPlatform = PlatformsInArea[PlatformsInArea.Num()-1];
 		}
+		//migrate the data from the pre reserved slots;
+
+		if(Platform->LinkedPlatform && Platform->LinkedPlatform->PreReservedRows.Num() >= 0)
+		{
+			for(auto& Rows : Platform->LinkedPlatform->PreReservedRows)
+			{
+				int32 NewPlatformIndex = Rows-8;
+				if(NewPlatformIndex>=0 && NewPlatformIndex<=7)
+				{
+					if(! Platform->BlockedRows.Contains(NewPlatformIndex)) Platform->BlockedRows.Add(NewPlatformIndex);
+				}else if(NewPlatformIndex>7)
+				{
+					if(!Platform->PreReservedRows.Contains(NewPlatformIndex)) Platform->PreReservedRows.Add(NewPlatformIndex);
+				}
+			}
+		}
+		
 		PlatformsInArea.Add(Platform);
 		Platform->GeneratePlatformContents();
 		
