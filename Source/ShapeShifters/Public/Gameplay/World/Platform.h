@@ -11,6 +11,7 @@ class AObstacle;
 UENUM()
 enum class EPlatformContentTypes : uint8
 {
+	None,
 	Wall,
 	Breakable,
 	Laser,
@@ -31,6 +32,9 @@ struct FGridData
 	int32 CellY;
 	UPROPERTY()
 	AObstacle* ContainedObstacle;
+	UPROPERTY()
+	EPlatformContentTypes ObstacleType;
+	
 	
 };
 
@@ -74,9 +78,9 @@ public:
 	UFUNCTION()
 	bool IsGridOccupiedAt(int32 X, int32 Y);
 	UFUNCTION()
-	void SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle);
+	void SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle, EPlatformContentTypes Type);
 	
-	TArray<FGridData*> GetCellsWithObstacle(TSubclassOf<AObstacle> ClassFilter);
+	TArray<FGridData*> GetCellsWithObstacle(EPlatformContentTypes Type);
 	FGridData* GetCellDataAt(int32 X, int32 Y);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -87,7 +91,7 @@ public:
 	UFUNCTION()
 	void SetWallBlocks(int32 NewWallRow);
 	
-
+	TArray<FGridData*> GetAllowedWallReplacements(EPlatformContentTypes Type);
 
 public:
 	// Called every frame

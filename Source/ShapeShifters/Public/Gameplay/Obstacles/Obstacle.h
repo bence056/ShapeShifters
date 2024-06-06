@@ -24,7 +24,7 @@ public:
 	int32 PosX;
 	UPROPERTY()
 	int32 PosY;
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float HideSlideDistance;
 
