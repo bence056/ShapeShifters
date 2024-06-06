@@ -25,6 +25,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TMap<EPlatformContentTypes, TSubclassOf<AObstacle>> ObstacleClasses;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TMap<EPlatformContentTypes, float> ObstacleWeights;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int32 MaxWallSpawnTrials;

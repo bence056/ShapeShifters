@@ -3,6 +3,7 @@
 
 #include "Gameplay/World/Platform.h"
 
+#include "GameModeInfoCustomizer.h"
 #include "Framework/ShiftersGameMode.h"
 #include "Gameplay/Obstacles/Obstacle.h"
 #include "Gameplay/Obstacles/WallObstacle.h"
@@ -78,6 +79,7 @@ void APlatform::SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y)
 	{
 		TgtGrid->ContainedObstacle->Destroy();
 		TgtGrid->ContainedObstacle = nullptr;
+		TgtGrid->ObstacleType = EPlatformContentTypes::None;
 	}
 	if(Type != EPlatformContentTypes::None)
 	{
@@ -215,8 +217,31 @@ void APlatform::GeneratePlatformContents()
 			//select type;
 			TArray<EPlatformContentTypes> Types;
 			ShiftersGameMode->ObstacleClasses.GetKeys(Types);
-			Types.Remove(EPlatformContentTypes::Wall);
-			EPlatformContentTypes Type = Types[Stream.RandRange(0, Types.Num()-1)];
+			
+			TMap<EPlatformContentTypes, float> FixedMap;
+			for(auto& Pair : ShiftersGameMode->ObstacleWeights.Array())
+			{
+				//remove wall and any objects that dont have a spawnable actor assigned in the other map.
+				if(Pair.Key != EPlatformContentTypes::Wall && Types.Contains(Pair.Key) || Pair.Key == EPlatformContentTypes::None)
+				{
+					FixedMap.Add(Pair);
+				}
+			}
+			
+			EPlatformContentTypes Type = EPlatformContentTypes::None;
+			float SumWeight = 0;
+			for(auto& Pair : FixedMap.Array()) SumWeight += Pair.Value;
+			float RandomWeight = Stream.RandRange(0.f, SumWeight);
+			for(auto& Pair : FixedMap.Array())
+			{
+				if(RandomWeight < Pair.Value)
+				{
+					Type = Pair.Key;
+					break;
+				}
+				RandomWeight -= Pair.Value;
+			}
+			
 			TArray<FGridData*> AllowedGrids = GetAllowedWallReplacements(Type);
 			if(AllowedGrids.Num() > 0)
 			{
@@ -283,28 +308,40 @@ TArray<FGridData*> APlatform::GetAllowedWallReplacements(EPlatformContentTypes T
 		for(auto& D : Data)
 		{
 			bool bCanAdd = true;
-			if(D->CellY > 0 && D->CellY < 7)
-			{
-				FGridData* CellLeft = GetCellDataAt(D->CellX, D->CellY-1);
-				FGridData* CellRight = GetCellDataAt(D->CellX, D->CellY+1);
+			FGridData* CellLeft = D->CellY > 0 ? GetCellDataAt(D->CellX, D->CellY-1) : nullptr;
+			FGridData* CellRight = D->CellY < 7 ? GetCellDataAt(D->CellX, D->CellY+1) : nullptr;
 
-				if(Type == EPlatformContentTypes::Breakable || Type == EPlatformContentTypes::None)
+			if(Type == EPlatformContentTypes::None)
+			{
+				
+				bCanAdd &= !CellLeft || CellLeft->ObstacleType == EPlatformContentTypes::Wall;
+				bCanAdd &= !CellRight || CellRight->ObstacleType == EPlatformContentTypes::Wall;
+			}else
+			{
+				if(D->CellY > 0 && D->CellY < 7)
 				{
-					bCanAdd &= CellLeft->ObstacleType == EPlatformContentTypes::Wall;
-					bCanAdd &= CellRight->ObstacleType == EPlatformContentTypes::Wall;
-				}else if(Type == EPlatformContentTypes::Laser)
-				{
-					bCanAdd &= CellLeft->ObstacleType == EPlatformContentTypes::Wall || CellLeft->ObstacleType == EPlatformContentTypes::Laser;
-					bCanAdd &= CellRight->ObstacleType == EPlatformContentTypes::Wall || CellRight->ObstacleType == EPlatformContentTypes::Laser;
+
+					if(Type == EPlatformContentTypes::Breakable)
+					{
+						bCanAdd &= CellLeft->ObstacleType == EPlatformContentTypes::Wall;
+						bCanAdd &= CellRight->ObstacleType == EPlatformContentTypes::Wall;
+					}else if(Type == EPlatformContentTypes::Laser)
+					{
+						bCanAdd &= CellLeft->ObstacleType == EPlatformContentTypes::Wall || CellLeft->ObstacleType == EPlatformContentTypes::Laser;
+						bCanAdd &= CellRight->ObstacleType == EPlatformContentTypes::Wall || CellRight->ObstacleType == EPlatformContentTypes::Laser;
+					}
+					else if(Type == EPlatformContentTypes::Spike || Type == EPlatformContentTypes::Turret)
+					{
+						bCanAdd &= CellLeft->ObstacleType != EPlatformContentTypes::Breakable && CellLeft->ObstacleType != EPlatformContentTypes::Laser;
+						bCanAdd &= CellRight->ObstacleType != EPlatformContentTypes::Breakable && CellRight->ObstacleType != EPlatformContentTypes::Laser;
+					}
 				}else
 				{
-					bCanAdd &= CellLeft->ObstacleType != EPlatformContentTypes::Breakable && CellLeft->ObstacleType != EPlatformContentTypes::Laser;
-					bCanAdd &= CellRight->ObstacleType != EPlatformContentTypes::Breakable && CellRight->ObstacleType != EPlatformContentTypes::Laser;
+					bCanAdd = false;
 				}
-				if(bCanAdd) ReturnGrid.Add(D);
 			}
+			if(bCanAdd) ReturnGrid.Add(D);
 		}
-		return ReturnGrid;
 	}
 	return ReturnGrid;
 }
