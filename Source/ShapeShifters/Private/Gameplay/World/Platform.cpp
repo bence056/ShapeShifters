@@ -3,17 +3,18 @@
 
 #include "Gameplay/World/Platform.h"
 
+#include "GameModeInfoCustomizer.h"
 #include "Framework/ShiftersGameMode.h"
 #include "Gameplay/Obstacles/Obstacle.h"
 #include "Gameplay/Obstacles/WallObstacle.h"
 #include "Kismet/GameplayStatics.h"
-
 
 FGridData::FGridData()
 {
 	CellX = 0;
 	CellY = 0;
 	ContainedObstacle = nullptr;
+	ObstacleType = EPlatformContentTypes::None;
 }
 
 // Sets default values
@@ -24,8 +25,7 @@ APlatform::APlatform()
 
 	PlatformMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlatformMesh"));
 	SetRootComponent(PlatformMesh);
-	MaxSpawnTrials = 5;
-	WallMinSize = 2;
+	bUseCustomSeed = false;
 }
 
 // Called when the game starts or when spawned
@@ -40,6 +40,7 @@ void APlatform::BeginPlay()
 			GD.CellX = x;
 			GD.CellY = y;
 			GD.ContainedObstacle = nullptr;
+			GD.ObstacleType = EPlatformContentTypes::None;
 			GridData.Add(GD);
 		}
 	}
@@ -78,13 +79,20 @@ void APlatform::SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y)
 	{
 		TgtGrid->ContainedObstacle->Destroy();
 		TgtGrid->ContainedObstacle = nullptr;
+		TgtGrid->ObstacleType = EPlatformContentTypes::None;
 	}
-	AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(*ObstacleClasses.Find(Type), GetGridLocation(X, Y), FRotator::ZeroRotator);
-	Obstacle->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-	Obstacle->OwningPlatform = this;
-	Obstacle->PosX = X;
-	Obstacle->PosY = Y;
-	SetDataAt(X, Y, Obstacle);
+	if(Type != EPlatformContentTypes::None)
+	{
+		if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			AObstacle* Obstacle = GetWorld()->SpawnActor<AObstacle>(*ShiftersGameMode->ObstacleClasses.Find(Type), GetGridLocation(X, Y), FRotator::ZeroRotator);
+			Obstacle->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			Obstacle->OwningPlatform = this;
+			Obstacle->PosX = X;
+			Obstacle->PosY = Y;
+			SetDataAt(X, Y, Obstacle, Type);
+		}
+	}
 }
 
 TArray<FGridData*> APlatform::GetEmptyInRow(int32 X)
@@ -112,23 +120,25 @@ bool APlatform::IsGridOccupiedAt(int32 X, int32 Y)
 	return false;
 }
 
-void APlatform::SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle)
+void APlatform::SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle, EPlatformContentTypes Type)
 {
 	for(auto& Entry : GridData)
 	{
 		if(Entry.CellX == X && Entry.CellY == Y)
 		{
 			Entry.ContainedObstacle = NewObstacle;
+			Entry.ObstacleType = Type;
 		}
 	}	
 }
 
-TArray<FGridData*> APlatform::GetCellsWithObstacle(TSubclassOf<AObstacle> ClassFilter)
+TArray<FGridData*> APlatform::GetCellsWithObstacle(EPlatformContentTypes Type)
 {
+	
 	TArray<FGridData*> RetArray;
 	for(auto& Cell : GridData)
 	{
-		if(Cell.ContainedObstacle && Cell.ContainedObstacle->GetClass()->IsChildOf(ClassFilter))
+		if(Cell.ContainedObstacle && Cell.ObstacleType == Type)
 		{
 			RetArray.Add(&Cell);
 		}
@@ -136,123 +146,7 @@ TArray<FGridData*> APlatform::GetCellsWithObstacle(TSubclassOf<AObstacle> ClassF
 	return RetArray;
 }
 
-bool APlatform::SpawnWall()
-{
-	//select a row to spawn the wall in.
-	if(GetMinObstacleIndex() >= 0)
-	{
-		int32 RowCount = FMath::RandRange(GetMinObstacleIndex(), 7);
-		//select a start and an end cell.
 
-		TArray<FGridData*> FreeInRow = GetEmptyInRow(RowCount);
-
-		//only allowed to spawn if there will be at least 1 gap.
-		if(FreeInRow.Num() >= 2)
-		{
-			TArray<int32> PossibleWallStarts;
-			for(auto& Free : FreeInRow)
-			{
-				PossibleWallStarts.Add(Free->CellY);
-			}
-			int32 StartCell = PossibleWallStarts[FMath::RandRange(0,PossibleWallStarts.Num()-1)];
-			TArray<int32> PossibleWallEnds;
-			//add the starting one (so we can and where we started);
-			PossibleWallEnds.Add(StartCell);
-			//check left:
-			bool bFreeSlot = true;
-			int32 locY = StartCell;
-			//remaining free slots on the entire line (we added the start, so its -1)
-			int32 FreeSlots = FreeInRow.Num()-1;
-			while (bFreeSlot)
-			{
-				if(locY != 0)
-				{
-					//step one left.
-					if(!IsGridOccupiedAt(RowCount, --locY) && FreeSlots > 1)
-					{
-						PossibleWallEnds.Add(locY);
-						FreeSlots--;
-					}else
-					{
-						bFreeSlot = false;
-					}
-				}else
-				{
-					bFreeSlot = false;
-				}
-			}
-			//check right
-			bFreeSlot = true;
-			locY = StartCell;
-			FreeSlots = FreeInRow.Num()-1;
-			while (bFreeSlot)
-			{
-				if(locY != 7)
-				{
-					//step one right.
-					if(!IsGridOccupiedAt(RowCount, ++locY) && FreeSlots > 1)
-					{
-						PossibleWallEnds.Add(locY);
-						FreeSlots--;
-					}else
-					{
-						bFreeSlot = false;
-					}
-				}else
-				{
-					bFreeSlot = false;
-				}
-			}
-			int32 EndCell = PossibleWallEnds[FMath::RandRange(0, PossibleWallEnds.Num()-1)];
-					
-					
-			//Generate Wall.
-				
-			int32 ArrayStart = FMath::Min(StartCell, EndCell);
-			int32 ArrayEnd = FMath::Max(StartCell, EndCell);
-
-			//check for wall min
-			if(ArrayEnd-ArrayStart+1 > WallMinSize)
-			{
-				for(int32 j=ArrayStart; j<=ArrayEnd; j++)
-				{
-					SpawnObstacle(EPlatformContentTypes::Wall, RowCount, j);
-				}
-				return true;
-			}
-		}
-	}
-	
-	return false;
-}
-
-bool APlatform::TrySpawnBreakableWall()
-{
-	TArray<FGridData*> WallCells = GetCellsWithObstacle(AWallObstacle::StaticClass());
-	if(WallCells.Num() > 0)
-	{
-		//adjust for non edge & surrounded walls.
-		TArray<FGridData*> CorrectWalls;
-		for(auto& Wall : WallCells)
-		{
-			if(Wall->CellY > 0 && Wall->CellY < 7 &&
-				WallCells.Contains(GetCellDataAt(Wall->CellX, Wall->CellY-1)) &&
-				WallCells.Contains(GetCellDataAt(Wall->CellX, Wall->CellY+1)))
-			{
-				CorrectWalls.Add(Wall);
-			}
-		}
-		if(CorrectWalls.Num() > 0)
-		{
-			FGridData* SelectedCell = CorrectWalls[FMath::RandRange(0, CorrectWalls.Num()-1)];
-			SpawnObstacle(EPlatformContentTypes::Breakable, SelectedCell->CellX, SelectedCell->CellY);
-			return true;
-		}
-	}
-	return false;
-	
-	
-}
 
 
 // Called every frame
@@ -278,32 +172,178 @@ void APlatform::DestroyPlatformAndContents()
 
 void APlatform::GeneratePlatformContents()
 {
-	for(int i=0; i<MaxSpawnTrials; i++)
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		TArray<EPlatformContentTypes> PlatformContentTypes;
-		ObstacleClasses.GetKeys(PlatformContentTypes);
-		if(PlatformContentTypes.Num() > 0)
+		//phase 1:
+		//generate the damn walls.
+		
+		FRandomStream Stream = FRandomStream(CustomSeed);
+		if(!bUseCustomSeed) Stream.GenerateNewSeed();
+
+		for(int32 Rep =0; Rep<ShiftersGameMode->MaxWallSpawnTrials; Rep++)
 		{
-			int32 RandomSelect = FMath::RandRange(0, PlatformContentTypes.Num()-1);
-			EPlatformContentTypes Type = PlatformContentTypes[RandomSelect];
-			bool bSuccess = false;
-			for(int t=0; t<GetTypeIterations(Type); t++)
+			TArray<int32> PotentialRows;
+			for(int32 i=0; i<8; i++)
 			{
-				if(Type == EPlatformContentTypes::Wall)
-				{	
-					bSuccess = SpawnWall();	
-				}else if(Type == EPlatformContentTypes::Breakable)
+				if(!BlockedRows.Contains(i)) PotentialRows.Add(i);
+			}
+			if(PotentialRows.Num() > 0)
+			{
+				int32 SelectedRow = PotentialRows[Stream.RandRange(0, PotentialRows.Num()-1)];
+				int32 SelectedWidth = Stream.RandRange(ShiftersGameMode->MinimumWallWidth, ShiftersGameMode->MaximumWallWidth);
+				if(SelectedWidth >= 1)
 				{
-					bSuccess = TrySpawnBreakableWall();
+					int32 MaxWallColumn = 8-SelectedWidth;
+					int32 StartingCol = Stream.RandRange(0, MaxWallColumn);
+					
+					for(int32 i=StartingCol; i<StartingCol+SelectedWidth; i++)
+					{
+						SpawnObstacle(EPlatformContentTypes::Wall, SelectedRow, i);
+					}
+					
+					SetWallBlocks(SelectedRow);
+					
+					
 				}
+				
+			}
+			
+		}
+		
+		//phase 2: gen obstacles.
+
+		for(int32 i=0; i<ShiftersGameMode->MaxObstacleReplacementTrials; i++)
+		{
+			//select type;
+			TArray<EPlatformContentTypes> Types;
+			ShiftersGameMode->ObstacleClasses.GetKeys(Types);
+			
+			TMap<EPlatformContentTypes, float> FixedMap;
+			for(auto& Pair : ShiftersGameMode->ObstacleWeights.Array())
+			{
+				//remove wall and any objects that dont have a spawnable actor assigned in the other map.
+				if(Pair.Key != EPlatformContentTypes::Wall && Types.Contains(Pair.Key) || Pair.Key == EPlatformContentTypes::None)
+				{
+					FixedMap.Add(Pair);
+				}
+			}
+			
+			EPlatformContentTypes Type = EPlatformContentTypes::None;
+			float SumWeight = 0;
+			for(auto& Pair : FixedMap.Array()) SumWeight += Pair.Value;
+			float RandomWeight = Stream.RandRange(0.f, SumWeight);
+			for(auto& Pair : FixedMap.Array())
+			{
+				if(RandomWeight < Pair.Value)
+				{
+					Type = Pair.Key;
+					break;
+				}
+				RandomWeight -= Pair.Value;
+			}
+			
+			TArray<FGridData*> AllowedGrids = GetAllowedWallReplacements(Type);
+			if(AllowedGrids.Num() > 0)
+			{
+				FGridData* SelectedGrid = AllowedGrids[Stream.RandRange(0, AllowedGrids.Num()-1)];
+				SpawnObstacle(Type, SelectedGrid->CellX, SelectedGrid->CellY);
+			}
+		}
+
+		//phase 3: free up at least a single.
+
+		for(int32 x=0; x<8; x++)
+		{
+			bool bShouldBreak = true;
+			TArray<FGridData*> ToBreak;
+			for(int32 y=0; y<8 && bShouldBreak; y++)
+			{
+				FGridData* Grid = GetCellDataAt(x,y);
+				if(Grid->ObstacleType == EPlatformContentTypes::Wall || Grid->ObstacleType == EPlatformContentTypes::Turret)
+				{
+					if(Grid->ObstacleType == EPlatformContentTypes::Wall)
+					{
+						ToBreak.Add(Grid);
+					}
+				}else
+				{
+					bShouldBreak = false;
+				}
+			}
+			if(bShouldBreak && ToBreak.Num() > 0)
+			{
+				FGridData* ReplaceGrid = ToBreak[Stream.RandRange(0, ToBreak.Num()-1)];
+				SpawnObstacle(EPlatformContentTypes::None, ReplaceGrid->CellX, ReplaceGrid->CellY);
+			}
+		}
+		
+	}
+}
+
+void APlatform::SetWallBlocks(int32 NewWallRow)
+{
+	// add blocks;
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		for(int32 i=NewWallRow-ShiftersGameMode->MinimumWallGap; i<=NewWallRow+ShiftersGameMode->MinimumWallGap; i++)
+		{
+			if(i>=0 && i<=7)
+			{
+				if(!BlockedRows.Contains(i)) BlockedRows.Add(i);
+			}else if(i>7)
+			{
+				if(!PreReservedRows.Contains(i)) PreReservedRows.Add(i);
 			}
 		}
 	}
 }
 
-int32 APlatform::GetMinObstacleIndex()
+TArray<FGridData*> APlatform::GetAllowedWallReplacements(EPlatformContentTypes Type)
 {
-	return 0;
+	TArray<FGridData*> ReturnGrid;
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		TArray<FGridData*> Data = GetCellsWithObstacle(EPlatformContentTypes::Wall);
+		//get all surrounded walls.
+		for(auto& D : Data)
+		{
+			bool bCanAdd = true;
+			FGridData* CellLeft = D->CellY > 0 ? GetCellDataAt(D->CellX, D->CellY-1) : nullptr;
+			FGridData* CellRight = D->CellY < 7 ? GetCellDataAt(D->CellX, D->CellY+1) : nullptr;
+
+			if(Type == EPlatformContentTypes::None)
+			{
+				
+				bCanAdd &= !CellLeft || CellLeft->ObstacleType == EPlatformContentTypes::Wall;
+				bCanAdd &= !CellRight || CellRight->ObstacleType == EPlatformContentTypes::Wall;
+			}else
+			{
+				if(D->CellY > 0 && D->CellY < 7)
+				{
+
+					if(Type == EPlatformContentTypes::Breakable)
+					{
+						bCanAdd &= CellLeft->ObstacleType == EPlatformContentTypes::Wall;
+						bCanAdd &= CellRight->ObstacleType == EPlatformContentTypes::Wall;
+					}else if(Type == EPlatformContentTypes::Laser)
+					{
+						bCanAdd &= CellLeft->ObstacleType == EPlatformContentTypes::Wall || CellLeft->ObstacleType == EPlatformContentTypes::Laser;
+						bCanAdd &= CellRight->ObstacleType == EPlatformContentTypes::Wall || CellRight->ObstacleType == EPlatformContentTypes::Laser;
+					}
+					else if(Type == EPlatformContentTypes::Spike || Type == EPlatformContentTypes::Turret)
+					{
+						bCanAdd &= CellLeft->ObstacleType != EPlatformContentTypes::Breakable && CellLeft->ObstacleType != EPlatformContentTypes::Laser;
+						bCanAdd &= CellRight->ObstacleType != EPlatformContentTypes::Breakable && CellRight->ObstacleType != EPlatformContentTypes::Laser;
+					}
+				}else
+				{
+					bCanAdd = false;
+				}
+			}
+			if(bCanAdd) ReturnGrid.Add(D);
+		}
+	}
+	return ReturnGrid;
 }
 
 FGridData* APlatform::GetCellDataAt(int32 X, int32 Y)
@@ -318,8 +358,3 @@ FGridData* APlatform::GetCellDataAt(int32 X, int32 Y)
 	return nullptr;
 }
 
-int32 APlatform::GetTypeIterations(EPlatformContentTypes Type)
-{
-	if(TypeSpawnIterations.Contains(Type)) return *TypeSpawnIterations.Find(Type);
-	return 1;
-}

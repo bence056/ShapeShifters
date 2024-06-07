@@ -11,8 +11,12 @@ class AObstacle;
 UENUM()
 enum class EPlatformContentTypes : uint8
 {
+	None,
 	Wall,
-	Breakable
+	Breakable,
+	Laser,
+	Spike,
+	Turret
 };
 
 USTRUCT(Blueprintable, BlueprintType)
@@ -28,6 +32,9 @@ struct FGridData
 	int32 CellY;
 	UPROPERTY()
 	AObstacle* ContainedObstacle;
+	UPROPERTY()
+	EPlatformContentTypes ObstacleType;
+	
 	
 };
 
@@ -44,20 +51,12 @@ public:
 	UStaticMeshComponent* PlatformMesh;
 	UPROPERTY()
 	APlatform* LinkedPlatform;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 MaxSpawnTrials;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 MinObstacleDepthDistance;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TMap<EPlatformContentTypes, int32> TypeSpawnIterations;
+	UPROPERTY()
+	TArray<int32> BlockedRows;
+	UPROPERTY()
+	TArray<int32> PreReservedRows;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TMap<EPlatformContentTypes, TSubclassOf<AObstacle>> ObstacleClasses;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 WallMinSize;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -72,27 +71,27 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	FVector GetGridLocation(int32 X, int32 Y);
-
+public:
 	UFUNCTION(BlueprintCallable)
 	void SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y);
 	TArray<FGridData*> GetEmptyInRow(int32 X);
 	UFUNCTION()
 	bool IsGridOccupiedAt(int32 X, int32 Y);
 	UFUNCTION()
-	void SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle);
+	void SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle, EPlatformContentTypes Type);
 	
-	TArray<FGridData*> GetCellsWithObstacle(TSubclassOf<AObstacle> ClassFilter);
+	TArray<FGridData*> GetCellsWithObstacle(EPlatformContentTypes Type);
 	FGridData* GetCellDataAt(int32 X, int32 Y);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bUseCustomSeed;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "bUseCustomSeed", EditConditionHides = true))
+	int32 CustomSeed;
 
-	UFUNCTION(BlueprintCallable)
-	int32 GetTypeIterations(EPlatformContentTypes Type);
+	UFUNCTION()
+	void SetWallBlocks(int32 NewWallRow);
 	
-	UFUNCTION()
-	bool SpawnWall();
-	UFUNCTION()
-	bool TrySpawnBreakableWall();
-
+	TArray<FGridData*> GetAllowedWallReplacements(EPlatformContentTypes Type);
 
 public:
 	// Called every frame
@@ -102,8 +101,5 @@ public:
 	void DestroyPlatformAndContents();
 	UFUNCTION(BlueprintCallable)
 	void GeneratePlatformContents();
-	
-	UFUNCTION(BlueprintCallable)
-	int32 GetMinObstacleIndex();
 	
 };

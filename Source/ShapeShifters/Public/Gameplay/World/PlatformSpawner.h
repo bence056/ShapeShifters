@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "PlatformSpawner.generated.h"
 
+class AObstacle;
+enum class EPlatformContentTypes : uint8;
 class UBoxComponent;
 class APlatform;
 
@@ -19,7 +21,7 @@ public:
 	APlatformSpawner();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSubclassOf<APlatform> PlatformClass;
+	TMap<TSubclassOf<APlatform>, float> PlatformClasses;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UBoxComponent* SpawnArea;
 
