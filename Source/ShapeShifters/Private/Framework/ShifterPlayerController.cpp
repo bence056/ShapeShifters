@@ -33,6 +33,10 @@ void AShifterPlayerController::TriggerPlayerDeath()
 		//stop the platforms.
 		GameMode->PlatformMovementSpeed = 0.f;
 	}
+	if(AShifterCharacter* SCharacter = Cast<AShifterCharacter>(GetPawn()))
+	{
+		SCharacter->ToggleSideMovement(false);
+	}
 }
 
 void AShifterPlayerController::BeginPlay()

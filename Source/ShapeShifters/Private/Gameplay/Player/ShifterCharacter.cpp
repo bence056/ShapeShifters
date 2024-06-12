@@ -31,6 +31,7 @@ AShifterCharacter::AShifterCharacter()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	ViewCamera->SetupAttachment(GetRootComponent());
 	LaneIndex = 0;
+	bCanMove = true;
 }
 
 // Called when the game starts or when spawned
@@ -56,14 +57,17 @@ void AShifterCharacter::PawnClientRestart()
 
 void AShifterCharacter::HandleLaneMovement(const FInputActionInstance& Action)
 {
-	float InputData = Action.GetValue().Get<float>();
-	if(InputData < 0.f)
+	if(bCanMove)
 	{
-		StepLeft();
+		float InputData = Action.GetValue().Get<float>();
+		if(InputData < 0.f)
+		{
+			StepLeft();
 		
-	}else if(InputData > 0.f)
-	{
-		StepRight();
+		}else if(InputData > 0.f)
+		{
+			StepRight();
+		}
 	}
 }
 
@@ -98,6 +102,13 @@ void AShifterCharacter::Tick(float DeltaTime)
 	}else
 	{
 		SetActorLocation(FMath::VInterpTo(GetActorLocation(), TargetLocation, DeltaTime, 8.f));
+	}
+	if(bCanMove)
+	{
+		if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			CurrentScore += (DeltaTime * GameMode->PlatformMovementSpeed * 0.003);
+		}
 	}
 	
 }
@@ -168,5 +179,10 @@ void AShifterCharacter::ChangePlayerHealth(float DeltaHealth)
 		DeltaHealth = FMath::Clamp(PlayerHealth+DeltaHealth, 0, ShiftersGameMode->PlayerMaxHealth);
 		SetPlayerHealth(DeltaHealth);
 	}
+}
+
+void AShifterCharacter::ToggleSideMovement(bool bOn)
+{
+	bCanMove = bOn;
 }
 
