@@ -26,8 +26,13 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UPlayerHud* PlayerHud;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> PlayerDeathUIClass;
+	
 	UFUNCTION(BlueprintCallable)
 	void TogglePlayerHud(bool bOn);
+	UFUNCTION()
+	void TriggerPlayerDeath();
 
 protected:
 

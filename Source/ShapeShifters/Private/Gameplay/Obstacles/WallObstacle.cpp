@@ -3,6 +3,8 @@
 
 #include "Gameplay/Obstacles/WallObstacle.h"
 
+#include "Gameplay/Player/ShifterCharacter.h"
+
 
 // Sets default values
 AWallObstacle::AWallObstacle()
@@ -22,5 +24,12 @@ void AWallObstacle::BeginPlay()
 void AWallObstacle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AWallObstacle::OnPlayerCollided(AShifterCharacter* Player)
+{
+	//kill instantly.
+	Player->SetPlayerHealth(0);
+	// Destroy();
 }
 

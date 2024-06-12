@@ -45,11 +45,6 @@ void APlatform::BeginPlay()
 		}
 	}
 	
-	if(AShiftersGameMode* GMode = Cast<AShiftersGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
-	{
-		Speed = GMode->PlatformMovementSpeed;
-	}
-	
 }
 
 void APlatform::FellOutOfWorld(const UDamageType& dmgType)
@@ -153,8 +148,12 @@ TArray<FGridData*> APlatform::GetCellsWithObstacle(EPlatformContentTypes Type)
 void APlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if(AShiftersGameMode* GMode = Cast<AShiftersGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+	{
+		SetActorLocation(GetActorLocation() + FVector(-1.f, 0.f, 0.f) * DeltaTime * GMode->PlatformMovementSpeed);
+	}
 	
-	SetActorLocation(GetActorLocation() + FVector(-1.f, 0.f, 0.f) * DeltaTime * Speed);
 	
 }
 

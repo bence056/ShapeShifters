@@ -25,20 +25,15 @@ public:
 	int32 PosX;
 	UPROPERTY()
 	int32 PosY;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	float HideSlideDistance;
+	UPROPERTY(EditDefaultsOnly)
+	float DamageToDeal;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UPROPERTY()
-	FVector SlideTargetLoc;
+	
 	UPROPERTY()
 	APlatform* OwningPlatform;
-	UPROPERTY()
-	bool bShouldSlide;
 
 	UFUNCTION()
 	FORCEINLINE FVector GetRelativeLocation() {return OwningPlatform->GetActorLocation() - GetActorLocation();}
@@ -47,9 +42,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable)
-	void TriggerSlide();
-
 	UFUNCTION()
-	void OnPlayerCollided(AShifterCharacter* Player);
+	virtual void OnPlayerCollided(AShifterCharacter* Player);
 };

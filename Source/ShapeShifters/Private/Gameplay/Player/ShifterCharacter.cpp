@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
+#include "Framework/ShifterPlayerController.h"
 #include "Framework/ShiftersGameMode.h"
 #include "Gameplay/Obstacles/Obstacle.h"
 #include "Gameplay/World/ShifterSpawner.h"
@@ -150,6 +151,13 @@ void AShifterCharacter::SetPlayerHealth(float Health)
 	if(Health >= 0)
 	{
 		PlayerHealth = Health;
+		if(PlayerHealth == 0)
+		{
+			if(AShifterPlayerController* PlayerController = Cast<AShifterPlayerController>(GetController()))
+			{
+				PlayerController->TriggerPlayerDeath();
+			}
+		}
 	}
 }
 

@@ -4,6 +4,7 @@
 #include "ShapeShifters/Public/Framework/ShifterPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Framework/ShiftersGameMode.h"
 #include "Gameplay/UMG/PlayerHud.h"
 #include "Kismet/GameplayStatics.h"
 #include "ShapeShifters/Public/Gameplay/Player/ShifterCharacter.h"
@@ -21,6 +22,16 @@ void AShifterPlayerController::TogglePlayerHud(bool bOn)
 		{
 			PlayerHud->RemoveFromParent();
 		}
+	}
+}
+
+void AShifterPlayerController::TriggerPlayerDeath()
+{
+	if(PlayerDeathUIClass) CreateWidget(this, PlayerDeathUIClass)->AddToViewport();
+	if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		//stop the platforms.
+		GameMode->PlatformMovementSpeed = 0.f;
 	}
 }
 

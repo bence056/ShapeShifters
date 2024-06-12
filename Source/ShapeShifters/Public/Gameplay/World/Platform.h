@@ -61,9 +61,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UPROPERTY()
-	float Speed;
+	
 	virtual void FellOutOfWorld(const UDamageType& dmgType) override;
 
 	UPROPERTY()
