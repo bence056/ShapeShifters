@@ -7,6 +7,7 @@
 #include "Gameplay/World/Platform.h"
 #include "Obstacle.generated.h"
 
+class AShifterCharacter;
 class APlatform;
 
 UCLASS()
@@ -48,5 +49,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void TriggerSlide();
-	
+
+	UFUNCTION()
+	void OnPlayerCollided(AShifterCharacter* Player);
 };

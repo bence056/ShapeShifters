@@ -7,7 +7,7 @@
 
 
 // Sets default values
-AObstacle::AObstacle()
+AObstacle::AObstacle(): PosX(0), PosY(0)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -42,5 +42,10 @@ void AObstacle::TriggerSlide()
 {
 	SlideTargetLoc = GetActorLocation() - FVector(0.f, 0.f, HideSlideDistance);
 	bShouldSlide = true;
+}
+
+void AObstacle::OnPlayerCollided(AShifterCharacter* Player)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Collided with: %s"), *GetName());
 }
 

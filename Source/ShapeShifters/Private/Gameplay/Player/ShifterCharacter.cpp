@@ -6,6 +6,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
+#include "Framework/ShiftersGameMode.h"
+#include "Gameplay/Obstacles/Obstacle.h"
 #include "Gameplay/World/ShifterSpawner.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -17,8 +20,11 @@ AShifterCharacter::AShifterCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComp = CreateDefaultSubobject<USceneComponent>(TEXT("RootComp"));
-	SetRootComponent(RootComp);
+	// RootComp = CreateDefaultSubobject<USceneComponent>(TEXT("RootComp"));
+	// SetRootComponent(RootComp);
+	ObstacleCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
+	SetRootComponent(ObstacleCollisionBox);
+	ObstacleCollisionBox->SetGenerateOverlapEvents(true);
 	ShapeMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShapeMesh"));
 	ShapeMesh->SetupAttachment(GetRootComponent());
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
@@ -31,6 +37,7 @@ void AShifterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	TargetLocation = GetActorLocation();
+	ObstacleCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AShifterCharacter::OnCollision);
 }
 
 void AShifterCharacter::PawnClientRestart()
@@ -67,6 +74,15 @@ void AShifterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	{
 		EnhancedInputComponent->BindAction(LaneChangeInputLeft, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleLaneMovement);
 		EnhancedInputComponent->BindAction(LaneChangeInputRight, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleLaneMovement);
+	}
+}
+
+void AShifterCharacter::OnCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(AObstacle* CollidedObs = Cast<AObstacle>(OtherActor))
+	{
+		CollidedObs->OnPlayerCollided(this);
 	}
 }
 
@@ -112,6 +128,37 @@ void AShifterCharacter::StepRight()
 		Loc.Y = GetSpawner()->GetGridLocationByIndex(++LaneIndex).Y;
 		
 		TargetLocation = Loc;
+	}
+}
+
+float AShifterCharacter::GetPlayerHealth()
+{
+	return PlayerHealth;
+}
+
+float AShifterCharacter::GetPlayerHealthPercentage()
+{
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		return PlayerHealth / ShiftersGameMode->PlayerMaxHealth;
+	}
+	return 0.f;
+}
+
+void AShifterCharacter::SetPlayerHealth(float Health)
+{
+	if(Health >= 0)
+	{
+		PlayerHealth = Health;
+	}
+}
+
+void AShifterCharacter::ChangePlayerHealth(float DeltaHealth)
+{
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		DeltaHealth = FMath::Clamp(PlayerHealth+DeltaHealth, 0, ShiftersGameMode->PlayerMaxHealth);
+		SetPlayerHealth(DeltaHealth);
 	}
 }
 

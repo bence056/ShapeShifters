@@ -38,5 +38,9 @@ public:
 	int32 MinimumWallWidth;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int32 MaximumWallWidth;
+
+	//player related stuff
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float PlayerMaxHealth = 100;
 	
 };

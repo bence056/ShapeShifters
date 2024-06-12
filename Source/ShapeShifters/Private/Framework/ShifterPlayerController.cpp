@@ -3,9 +3,26 @@
 
 #include "ShapeShifters/Public/Framework/ShifterPlayerController.h"
 
+#include "Blueprint/UserWidget.h"
+#include "Gameplay/UMG/PlayerHud.h"
 #include "Kismet/GameplayStatics.h"
 #include "ShapeShifters/Public/Gameplay/Player/ShifterCharacter.h"
 #include "ShapeShifters/Public/Gameplay/World/ShifterSpawner.h"
+
+void AShifterPlayerController::TogglePlayerHud(bool bOn)
+{
+	if(!PlayerHud && PlayerHudClass) PlayerHud = CreateWidget<UPlayerHud>(this, PlayerHudClass);
+	if(PlayerHud)
+	{
+		if(bOn)
+		{
+			PlayerHud->AddToViewport();
+		}else
+		{
+			PlayerHud->RemoveFromParent();
+		}
+	}
+}
 
 void AShifterPlayerController::BeginPlay()
 {
@@ -19,6 +36,7 @@ void AShifterPlayerController::BeginPlay()
 			ShifterCharacter = GetWorld()->SpawnActor<AShifterCharacter>(ShifterClass, Locator->GetGridLocationByIndex(RandSpawnSlot), Locator->GetActorRotation());
 			ShifterCharacter->LaneIndex = RandSpawnSlot;
 			Possess(ShifterCharacter);
+			TogglePlayerHud(true);
 		}
 				
 	}

@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "ShifterPlayerController.generated.h"
 
+class UPlayerHud;
 class AShifterCharacter;
 /**
  * 
@@ -19,6 +20,14 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AShifterCharacter> ShifterClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> PlayerHudClass;
+	UPROPERTY(BlueprintReadOnly)
+	UPlayerHud* PlayerHud;
+
+	UFUNCTION(BlueprintCallable)
+	void TogglePlayerHud(bool bOn);
 
 protected:
 
