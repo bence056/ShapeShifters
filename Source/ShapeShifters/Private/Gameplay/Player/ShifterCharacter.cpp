@@ -107,7 +107,7 @@ void AShifterCharacter::Tick(float DeltaTime)
 	{
 		if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 		{
-			CurrentScore += (DeltaTime * GameMode->PlatformMovementSpeed * 0.003);
+			CurrentScore += (DeltaTime * GameMode->PlatformMovementSpeed * GameMode->PlayerScoreMultiplier);
 		}
 	}
 	

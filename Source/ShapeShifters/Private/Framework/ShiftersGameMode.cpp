@@ -12,3 +12,9 @@ AShiftersGameMode::AShiftersGameMode()
 	MinimumWallWidth = 1;
 	MaximumWallWidth = 8;
 }
+
+void AShiftersGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	PlatformMovementSpeed += DeltaSeconds * PlatformAcceleration;
+}

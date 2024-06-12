@@ -3,10 +3,8 @@
 
 #include "Gameplay/World/Platform.h"
 
-#include "GameModeInfoCustomizer.h"
 #include "Framework/ShiftersGameMode.h"
 #include "Gameplay/Obstacles/Obstacle.h"
-#include "Gameplay/Obstacles/WallObstacle.h"
 #include "Kismet/GameplayStatics.h"
 
 FGridData::FGridData()

@@ -22,6 +22,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float PlatformMovementSpeed;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float PlatformAcceleration = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TMap<EPlatformContentTypes, TSubclassOf<AObstacle>> ObstacleClasses;
@@ -42,5 +44,11 @@ public:
 	//player related stuff
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float PlayerMaxHealth = 100;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float PlayerScoreMultiplier = 0.003;
+
+protected:
+	
+	virtual void Tick(float DeltaSeconds) override;
 	
 };
