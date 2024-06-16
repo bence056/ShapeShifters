@@ -40,6 +40,10 @@ void AShifterCharacter::BeginPlay()
 	Super::BeginPlay();
 	TargetLocation = GetActorLocation();
 	ObstacleCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AShifterCharacter::OnCollision);
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		ShapeMesh->SetStaticMesh(*ShiftersGameMode->ShapeMeshTable.Find(ShiftersGameMode->ShapeLoadout[0]));
+	}
 }
 
 void AShifterCharacter::PawnClientRestart()
@@ -184,5 +188,20 @@ void AShifterCharacter::ChangePlayerHealth(float DeltaHealth)
 void AShifterCharacter::ToggleSideMovement(bool bOn)
 {
 	bCanMove = bOn;
+}
+
+EShapeType AShifterCharacter::GetShapeType()
+{
+	return CurrentShapeType;
+}
+
+void AShifterCharacter::SetShapeType(EShapeType ToSet)
+{
+	CurrentShapeType = ToSet;
+}
+
+void AShifterCharacter::OnPlayerShifted(EShapeType Shape)
+{
+	
 }
 

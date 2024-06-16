@@ -3,6 +3,8 @@
 
 #include "ShapeShifters/Public/Framework/ShiftersGameMode.h"
 
+#include "Gameplay/Player/ShifterCharacter.h"
+
 AShiftersGameMode::AShiftersGameMode()
 {
 	PlatformMovementSpeed = 100.f;
@@ -11,6 +13,24 @@ AShiftersGameMode::AShiftersGameMode()
 	MaxWallSpawnTrials = 3;
 	MinimumWallWidth = 1;
 	MaximumWallWidth = 8;
+	ShiftTokens = 50;
+}
+
+void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape)
+{
+	if(Player->GetShapeType() != ToShape)
+	{
+		if(ShiftTokens > 0)
+		{
+			Player->SetShapeType(ToShape);
+			ShiftTokens--;
+			if(UStaticMesh* NewShape = *ShapeMeshTable.Find(ToShape))
+			{
+				Player->ShapeMesh->SetStaticMesh(NewShape);
+			}
+			Player->OnPlayerShifted(ToShape);
+		}
+	}
 }
 
 void AShiftersGameMode::Tick(float DeltaSeconds)

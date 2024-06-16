@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "ShiftersGameMode.generated.h"
 
+enum class EShapeType : uint8;
+class AShifterCharacter;
 class AObstacle;
 enum class EPlatformContentTypes : uint8;
 /**
@@ -46,9 +48,24 @@ public:
 	float PlayerMaxHealth = 100;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float PlayerScoreMultiplier = 0.003;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TArray<EShapeType> ShapeLoadout;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TMap<EShapeType, UStaticMesh*> ShapeMeshTable;
+	
+	UFUNCTION(BlueprintCallable)
+	void ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape);
+	
 
 protected:
 	
 	virtual void Tick(float DeltaSeconds) override;
+
+	//game related stuff.
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TArray<EShapeType> UnlockedShapes;
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	int32 ShiftTokens;
+	
 	
 };

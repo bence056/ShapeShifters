@@ -14,6 +14,18 @@ class UCameraComponent;
 class UInputAction;
 class AGameCamera;
 
+UENUM(Blueprintable, BlueprintType)
+enum class EShapeType : uint8
+{
+	Cube,
+	Ball,
+	Cylinder,
+	Pyramid,
+	Octahedron,
+	Dodecahedron,
+	MobiusStrip
+};
+
 UCLASS()
 class SHAPESHIFTERS_API AShifterCharacter : public APawn
 {
@@ -69,6 +81,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	float CurrentScore = 0;
 
+	UPROPERTY(BlueprintReadWrite)
+	EShapeType CurrentShapeType;
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -89,4 +104,11 @@ public:
 	void ChangePlayerHealth(float DeltaHealth);
 	UFUNCTION()
 	void ToggleSideMovement(bool bOn);
+
+	UFUNCTION(BlueprintPure)
+	EShapeType GetShapeType();
+	UFUNCTION(BlueprintCallable)
+	void SetShapeType(EShapeType ToSet);
+	UFUNCTION()
+	void OnPlayerShifted(EShapeType Shape);
 };
