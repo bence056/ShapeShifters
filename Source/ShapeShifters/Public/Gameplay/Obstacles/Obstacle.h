@@ -28,6 +28,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	float DamageToDeal;
 
+	UPROPERTY()
+	EPlatformContentTypes ObstacleType;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

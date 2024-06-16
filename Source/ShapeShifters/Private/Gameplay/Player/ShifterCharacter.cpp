@@ -105,7 +105,7 @@ void AShifterCharacter::Tick(float DeltaTime)
 		SetActorLocation(TargetLocation);
 	}else
 	{
-		SetActorLocation(FMath::VInterpTo(GetActorLocation(), TargetLocation, DeltaTime, 8.f));
+		SetActorLocation(FMath::VInterpTo(GetActorLocation(), TargetLocation, DeltaTime, CurrentShapeType == EShapeType::Ball ? LaneSwapSpeedAsBall : LaneSwapSpeed));
 	}
 	if(bCanMove)
 	{

@@ -83,6 +83,7 @@ void APlatform::SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y)
 			Obstacle->OwningPlatform = this;
 			Obstacle->PosX = X;
 			Obstacle->PosY = Y;
+			Obstacle->ObstacleType = Type;
 			SetDataAt(X, Y, Obstacle, Type);
 		}
 	}

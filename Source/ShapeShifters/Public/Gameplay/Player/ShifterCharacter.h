@@ -57,6 +57,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UBoxComponent* ObstacleCollisionBox;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float LaneSwapSpeed = 8.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float LaneSwapSpeedAsBall = 14.f;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
