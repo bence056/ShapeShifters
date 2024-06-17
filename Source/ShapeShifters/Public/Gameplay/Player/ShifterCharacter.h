@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "ShifterCharacter.generated.h"
 
+class UCharacterShiftInputAction;
 class UBoxComponent;
 class AShifterSpawner;
 struct FInputActionInstance;
@@ -53,6 +54,14 @@ public:
 	UInputAction* LaneChangeInputLeft;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
 	UInputAction* LaneChangeInputRight;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
+	UInputAction* UseAbilityInput;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
+	UCharacterShiftInputAction* SwapCharacter1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
+	UCharacterShiftInputAction* SwapCharacter2;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
+	UCharacterShiftInputAction* SwapCharacter3;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UBoxComponent* ObstacleCollisionBox;
@@ -75,6 +84,11 @@ protected:
 	UFUNCTION()
 	void HandleLaneMovement(const FInputActionInstance& Action);
 
+	UFUNCTION()
+	void HandleSwapCharacter(const FInputActionInstance& Action);
+	UFUNCTION()
+	void HandleUseAbility(const FInputActionInstance& Action);
+	
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

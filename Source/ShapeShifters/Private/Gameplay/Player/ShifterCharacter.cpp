@@ -9,6 +9,7 @@
 #include "Components/BoxComponent.h"
 #include "Framework/ShifterPlayerController.h"
 #include "Framework/ShiftersGameMode.h"
+#include "Framework/Input/CharacterShiftInputAction.h"
 #include "Gameplay/Abilities/Ability.h"
 #include "Gameplay/Obstacles/Obstacle.h"
 #include "Gameplay/World/ShifterSpawner.h"
@@ -83,6 +84,34 @@ void AShifterCharacter::HandleLaneMovement(const FInputActionInstance& Action)
 	}
 }
 
+void AShifterCharacter::HandleSwapCharacter(const FInputActionInstance& Action)
+{
+	if(const UCharacterShiftInputAction* ShiftInputAction = Cast<UCharacterShiftInputAction>(Action.GetSourceAction()))
+	{
+		if(Action.GetValue().Get<bool>())
+		{
+			if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+			{
+				ShiftersGameMode->ShiftPlayer(this, ShiftersGameMode->ShapeLoadout[ShiftInputAction->ShapeIndex]);
+			}
+		}	
+	}
+}
+
+void AShifterCharacter::HandleUseAbility(const FInputActionInstance& Action)
+{
+	if(Action.GetValue().Get<bool>())
+	{
+		if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			if(UAbility** Ability = ShiftersGameMode->ShapeAbilityTable.Find(CurrentShapeType))
+			{
+				(*Ability)->OnAbilityActivated();
+			}
+		}
+	}
+}
+
 void AShifterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -91,6 +120,10 @@ void AShifterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	{
 		EnhancedInputComponent->BindAction(LaneChangeInputLeft, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleLaneMovement);
 		EnhancedInputComponent->BindAction(LaneChangeInputRight, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleLaneMovement);
+		EnhancedInputComponent->BindAction(SwapCharacter1, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleSwapCharacter);
+		EnhancedInputComponent->BindAction(SwapCharacter2, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleSwapCharacter);
+		EnhancedInputComponent->BindAction(SwapCharacter3, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleSwapCharacter);
+		EnhancedInputComponent->BindAction(UseAbilityInput, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleUseAbility);
 	}
 }
 
