@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "ShiftersGameMode.generated.h"
 
+class UAbility;
 enum class EShapeType : uint8;
 class AShifterCharacter;
 class AObstacle;
@@ -52,6 +53,8 @@ public:
 	TArray<EShapeType> ShapeLoadout;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TMap<EShapeType, UStaticMesh*> ShapeMeshTable;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Instanced)
+	TMap<EShapeType, UAbility*> ShapeAbilityTable;
 	
 	UFUNCTION(BlueprintCallable)
 	void ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape);

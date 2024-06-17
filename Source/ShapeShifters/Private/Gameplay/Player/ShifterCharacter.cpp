@@ -9,6 +9,7 @@
 #include "Components/BoxComponent.h"
 #include "Framework/ShifterPlayerController.h"
 #include "Framework/ShiftersGameMode.h"
+#include "Gameplay/Abilities/Ability.h"
 #include "Gameplay/Obstacles/Obstacle.h"
 #include "Gameplay/World/ShifterSpawner.h"
 #include "Kismet/GameplayStatics.h"
@@ -43,6 +44,13 @@ void AShifterCharacter::BeginPlay()
 	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 	{
 		ShapeMesh->SetStaticMesh(*ShiftersGameMode->ShapeMeshTable.Find(ShiftersGameMode->ShapeLoadout[0]));
+		for(auto& Shape : ShiftersGameMode->ShapeLoadout)
+		{
+			if(UAbility** Ability = ShiftersGameMode->ShapeAbilityTable.Find(Shape))
+			{
+				(*Ability)->InitializeAbility(false);
+			}
+		}
 	}
 }
 

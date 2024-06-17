@@ -3,7 +3,7 @@
 
 #include "Gameplay/Abilities/Ability.h"
 
-UAbility::UAbility(): AbilityChargeTime(5), bTimeBased(true), AbilityRunTime(10), StackCurrent(0), StackMax(1), bCanCharge(true)
+UAbility::UAbility(): AbilityChargeTime(5), bTimeBased(true), AbilityRunTime(10), StackMax(1), bCanCharge(true), StackCurrent(0)
 {
 }
 
@@ -23,12 +23,16 @@ void UAbility::ChargeTimerExpiredCallback()
 
 void UAbility::OnAbilityActivated()
 {
-	if(StackCurrent > 0)
+	if(StackCurrent > 0 && !GetWorld()->GetTimerManager().IsTimerActive(ActiveTimer))
+		
 	{
 		DisableCharging();
 		if(bTimeBased)
 		{
 			GetWorld()->GetTimerManager().SetTimer(ActiveTimer, this, &UAbility::ActiveTimerExpiredCallback, AbilityRunTime);
+		}else
+		{
+			EnableCharging();
 		}
 		StackCurrent--;
 	}
@@ -37,19 +41,13 @@ void UAbility::OnAbilityActivated()
 
 void UAbility::OnAbilityExpired()
 {
-	EnableCharging();
 	GetWorld()->GetTimerManager().ClearTimer(ActiveTimer);
-	if(bCanCharge) InitializeAbility(false);
-	
+	EnableCharging();
 }
 
 float UAbility::GetAbilityChargePercent()
 {
-	if(StackCurrent < StackMax)
-	{
-		return FMath::Max(0, GetWorld()->GetTimerManager().GetTimerElapsed(ChargeTimer)) / AbilityChargeTime;	
-	}
-	return 1;
+	return FMath::Max(0, GetWorld()->GetTimerManager().GetTimerElapsed(ChargeTimer)) / AbilityChargeTime;	
 }
 
 float UAbility::GetAbilityRunPercent()
@@ -79,6 +77,10 @@ void UAbility::EnableCharging()
 	if(GetWorld()->GetTimerManager().IsTimerPaused(ChargeTimer))
 	{
 		GetWorld()->GetTimerManager().UnPauseTimer(ChargeTimer);
+	}else
+	{
+		//start a new timer;
+		InitializeAbility(false);
 	}
 }
 

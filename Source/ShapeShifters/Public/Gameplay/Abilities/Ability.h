@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Blueprintable, BlueprintType, EditInlineNew, DefaultToInstanced)
 class SHAPESHIFTERS_API UAbility : public UObject
 {
 	GENERATED_BODY()
@@ -44,12 +44,12 @@ protected:
 	
 	UPROPERTY()
 	bool bCanCharge;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	int32 StackCurrent;
 	
 public:
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	virtual void OnAbilityActivated();
 	UFUNCTION()
 	virtual void OnAbilityExpired();

@@ -3,6 +3,7 @@
 
 #include "ShapeShifters/Public/Framework/ShiftersGameMode.h"
 
+#include "Gameplay/Abilities/Ability.h"
 #include "Gameplay/Player/ShifterCharacter.h"
 
 AShiftersGameMode::AShiftersGameMode()
@@ -22,11 +23,16 @@ void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShap
 	{
 		if(ShiftTokens > 0)
 		{
+			//cancel the ability:
+			if(UAbility** Ability = ShapeAbilityTable.Find(Player->GetShapeType()))
+			{
+				(*Ability)->OnAbilityExpired();
+			}
 			Player->SetShapeType(ToShape);
 			ShiftTokens--;
-			if(UStaticMesh* NewShape = *ShapeMeshTable.Find(ToShape))
+			if(UStaticMesh** NewShape = ShapeMeshTable.Find(ToShape))
 			{
-				Player->ShapeMesh->SetStaticMesh(NewShape);
+				Player->ShapeMesh->SetStaticMesh(*NewShape);
 			}
 			Player->OnPlayerShifted(ToShape);
 		}

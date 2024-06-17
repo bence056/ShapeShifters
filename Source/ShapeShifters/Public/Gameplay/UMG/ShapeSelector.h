@@ -10,7 +10,7 @@
  * 
  */
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSelectorClicked);
+
 
 UCLASS()
 class SHAPESHIFTERS_API UShapeSelector : public UUserWidget
@@ -19,7 +19,7 @@ class SHAPESHIFTERS_API UShapeSelector : public UUserWidget
 
 public:
 
-	UPROPERTY(BlueprintReadOnly, BlueprintAssignable)
-	FSelectorClicked OnSelectorClicked;
+
+
 	
 };
