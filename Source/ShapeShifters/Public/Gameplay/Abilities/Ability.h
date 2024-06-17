@@ -51,6 +51,11 @@ protected:
 public:
 
 	UFUNCTION(BlueprintCallable)
+	void ActivateAbility(AShifterCharacter* PlayerCharacter);
+	UFUNCTION()
+	void ExpireAbility(AShifterCharacter* PlayerCharacter);
+
+	UFUNCTION()
 	virtual void OnAbilityActivated(AShifterCharacter* PlayerCharacter);
 	UFUNCTION()
 	virtual void OnAbilityExpired(AShifterCharacter* PlayerCharacter);

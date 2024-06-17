@@ -15,7 +15,7 @@ void UAbility::ActiveTimerExpiredCallback()
 {
 	if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		OnAbilityExpired(GameMode->GameCharacterPtr);
+		ExpireAbility(GameMode->GameCharacterPtr);
 	}
 }
 
@@ -28,10 +28,9 @@ void UAbility::ChargeTimerExpiredCallback()
 	}
 }
 
-void UAbility::OnAbilityActivated(AShifterCharacter* PlayerCharacter)
+void UAbility::ActivateAbility(AShifterCharacter* PlayerCharacter)
 {
 	if(StackCurrent > 0 && !GetWorld()->GetTimerManager().IsTimerActive(ActiveTimer))
-		
 	{
 		DisableCharging();
 		if(bTimeBased)
@@ -42,17 +41,27 @@ void UAbility::OnAbilityActivated(AShifterCharacter* PlayerCharacter)
 			EnableCharging();
 		}
 		StackCurrent--;
+		OnAbilityActivated(PlayerCharacter);
 	}
 	
 }
 
-void UAbility::OnAbilityExpired(AShifterCharacter* PlayerCharacter)
+void UAbility::ExpireAbility(AShifterCharacter* PlayerCharacter)
 {
 	if(IsAbilityActive())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ActiveTimer);
-		EnableCharging();	
+		EnableCharging();
 	}
+	OnAbilityExpired(PlayerCharacter);
+}
+
+void UAbility::OnAbilityActivated(AShifterCharacter* PlayerCharacter)
+{
+}
+
+void UAbility::OnAbilityExpired(AShifterCharacter* PlayerCharacter)
+{
 }
 
 float UAbility::GetAbilityChargePercent()

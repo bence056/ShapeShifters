@@ -8,6 +8,9 @@
 
 AShiftersGameMode::AShiftersGameMode()
 {
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bCanEverTick = true;
+
 	PlatformMovementSpeed = 100.f;
 	MinimumWallGap = 2;
 	MaxObstacleReplacementTrials = 3;
@@ -27,7 +30,7 @@ void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShap
 			//cancel the ability:
 			if(UAbility** Ability = ShapeAbilityTable.Find(Player->GetShapeType()))
 			{
-				(*Ability)->OnAbilityExpired(Player);
+				(*Ability)->ExpireAbility(Player);
 			}
 			Player->SetShapeType(ToShape);
 			ShiftTokens--;
@@ -44,4 +47,5 @@ void AShiftersGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	PlatformMovementSpeed += DeltaSeconds * PlatformAcceleration;
+	// UE_LOG(LogTemp, Warning, TEXT("%f"), PlatformMovementSpeed);
 }

@@ -64,6 +64,8 @@ public:
 	UPROPERTY()
 	AShifterCharacter* GameCharacterPtr;
 
+	
+
 protected:
 	
 	virtual void Tick(float DeltaSeconds) override;

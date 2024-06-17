@@ -4,6 +4,7 @@
 #include "ShapeShifters/Public/Framework/ShifterPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Framework/ShifterGameInstance.h"
 #include "Framework/ShiftersGameMode.h"
 #include "Gameplay/UMG/PlayerHud.h"
 #include "Kismet/GameplayStatics.h"
@@ -32,10 +33,20 @@ void AShifterPlayerController::TriggerPlayerDeath()
 	{
 		//stop the platforms.
 		GameMode->PlatformMovementSpeed = 0.f;
+		GameMode->PlatformAcceleration = 0.f;
+		
 	}
 	if(AShifterCharacter* SCharacter = Cast<AShifterCharacter>(GetPawn()))
 	{
-		SCharacter->ToggleSideMovement(false);
+		if(UShifterGameInstance* ShifterGameInstance = Cast<UShifterGameInstance>(GetGameInstance()))
+		{
+			SCharacter->ToggleSideMovement(false);
+			if(SCharacter->CurrentScore > ShifterGameInstance->HighScore)
+			{
+				ShifterGameInstance->HighScore = SCharacter->CurrentScore;
+			}
+		}
+		
 	}
 }
 

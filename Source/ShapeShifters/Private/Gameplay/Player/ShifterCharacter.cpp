@@ -33,6 +33,7 @@ AShifterCharacter::AShifterCharacter()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	ViewCamera->SetupAttachment(GetRootComponent());
 	LaneIndex = 0;
+	CurrentScore = 0.f;
 	bCanMove = true;
 }
 
@@ -106,7 +107,7 @@ void AShifterCharacter::HandleUseAbility(const FInputActionInstance& Action)
 		{
 			if(UAbility** Ability = ShiftersGameMode->ShapeAbilityTable.Find(CurrentShapeType))
 			{
-				(*Ability)->OnAbilityActivated(this);
+				(*Ability)->ActivateAbility(this);
 			}
 		}
 	}
