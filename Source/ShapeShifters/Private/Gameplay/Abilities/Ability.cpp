@@ -48,8 +48,11 @@ void UAbility::OnAbilityActivated(AShifterCharacter* PlayerCharacter)
 
 void UAbility::OnAbilityExpired(AShifterCharacter* PlayerCharacter)
 {
-	GetWorld()->GetTimerManager().ClearTimer(ActiveTimer);
-	EnableCharging();
+	if(IsAbilityActive())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(ActiveTimer);
+		EnableCharging();	
+	}
 }
 
 float UAbility::GetAbilityChargePercent()
@@ -98,4 +101,9 @@ void UAbility::DisableCharging()
 	{
 		GetWorld()->GetTimerManager().PauseTimer(ChargeTimer);
 	}
+}
+
+bool UAbility::IsAbilityActive()
+{
+	return GetWorld()->GetTimerManager().IsTimerActive(ActiveTimer);
 }

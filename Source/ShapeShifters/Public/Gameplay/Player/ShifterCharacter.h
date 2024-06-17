@@ -71,6 +71,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float LaneSwapSpeedAsBall = 14.f;
 
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -93,6 +94,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float PlayerHealth;
+	UPROPERTY()
+	float ShieldCurrentHealth;
 
 	UFUNCTION()
 	void OnCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -130,4 +133,15 @@ public:
 	void SetShapeType(EShapeType ToSet);
 	UFUNCTION()
 	void OnPlayerShifted(EShapeType Shape);
+	UFUNCTION(BlueprintCallable)
+	void ActivateShield();
+	UFUNCTION(BlueprintCallable)
+	void DeactivateShield();
+
+	UFUNCTION(BlueprintPure)
+	float GetShieldPercentage();
+
+	UFUNCTION(BlueprintPure)
+	float GetShieldHealth();
+	
 };

@@ -48,6 +48,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float PlayerMaxHealth = 100;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float ShieldMaxHealth = 50;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float PlayerScoreMultiplier = 0.003;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TArray<EShapeType> ShapeLoadout;

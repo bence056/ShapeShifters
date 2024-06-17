@@ -221,8 +221,28 @@ void AShifterCharacter::ChangePlayerHealth(float DeltaHealth)
 {
 	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		DeltaHealth = FMath::Clamp(PlayerHealth+DeltaHealth, 0, ShiftersGameMode->PlayerMaxHealth);
-		SetPlayerHealth(DeltaHealth);
+
+		if(DeltaHealth >= 0.f)
+		{
+			DeltaHealth = FMath::Clamp(PlayerHealth+DeltaHealth, 0, ShiftersGameMode->PlayerMaxHealth);
+			SetPlayerHealth(DeltaHealth);
+		}else
+		{
+			DeltaHealth *= -1.f;
+			
+			float TransferDamage = FMath::Max(0.f, DeltaHealth - ShieldCurrentHealth);
+			bool bShouldDropPlayerDamage = ShieldCurrentHealth > 0.f && TransferDamage >= PlayerHealth;
+
+			float ShieldTakeDamage = FMath::Min(ShieldCurrentHealth, DeltaHealth);
+			ShieldCurrentHealth -= ShieldTakeDamage;
+
+			if(!bShouldDropPlayerDamage)
+			{
+				DeltaHealth = FMath::Clamp(PlayerHealth-TransferDamage, 0.f, ShiftersGameMode->PlayerMaxHealth);
+				SetPlayerHealth(DeltaHealth);
+			}
+			
+		}
 	}
 }
 
@@ -244,5 +264,32 @@ void AShifterCharacter::SetShapeType(EShapeType ToSet)
 void AShifterCharacter::OnPlayerShifted(EShapeType Shape)
 {
 	
+}
+
+void AShifterCharacter::ActivateShield()
+{
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		ShieldCurrentHealth = ShiftersGameMode->ShieldMaxHealth;
+	}
+}
+
+void AShifterCharacter::DeactivateShield()
+{
+	ShieldCurrentHealth = 0.f;
+}
+
+float AShifterCharacter::GetShieldPercentage()
+{
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		return ShieldCurrentHealth / ShiftersGameMode->ShieldMaxHealth;
+	}
+	return 0.f;
+}
+
+float AShifterCharacter::GetShieldHealth()
+{
+	return ShieldCurrentHealth;
 }
 

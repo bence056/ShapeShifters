@@ -67,5 +67,8 @@ public:
 	void EnableCharging();
 	UFUNCTION()
 	void DisableCharging();
+
+	UFUNCTION(BlueprintPure)
+	bool IsAbilityActive();
 	
 };

@@ -15,6 +15,7 @@ AShiftersGameMode::AShiftersGameMode()
 	MinimumWallWidth = 1;
 	MaximumWallWidth = 8;
 	ShiftTokens = 50;
+	GameCharacterPtr = nullptr;
 }
 
 void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape)
