@@ -106,7 +106,7 @@ void AShifterCharacter::HandleUseAbility(const FInputActionInstance& Action)
 		{
 			if(UAbility** Ability = ShiftersGameMode->ShapeAbilityTable.Find(CurrentShapeType))
 			{
-				(*Ability)->OnAbilityActivated();
+				(*Ability)->OnAbilityActivated(this);
 			}
 		}
 	}

@@ -51,6 +51,10 @@ void AShifterPlayerController::BeginPlay()
 			ShifterCharacter = GetWorld()->SpawnActor<AShifterCharacter>(ShifterClass, Locator->GetGridLocationByIndex(RandSpawnSlot), Locator->GetActorRotation());
 			ShifterCharacter->LaneIndex = RandSpawnSlot;
 			Possess(ShifterCharacter);
+			if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+			{
+				GameMode->GameCharacterPtr = ShifterCharacter;
+			}
 			TogglePlayerHud(true);
 		}
 				

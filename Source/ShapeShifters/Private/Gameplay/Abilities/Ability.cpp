@@ -3,13 +3,20 @@
 
 #include "Gameplay/Abilities/Ability.h"
 
+#include "Framework/ShiftersGameMode.h"
+
+class AShiftersGameMode;
+
 UAbility::UAbility(): AbilityChargeTime(5), bTimeBased(true), AbilityRunTime(10), StackMax(1), bCanCharge(true), StackCurrent(0)
 {
 }
 
 void UAbility::ActiveTimerExpiredCallback()
 {
-	OnAbilityExpired();
+	if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		OnAbilityExpired(GameMode->GameCharacterPtr);
+	}
 }
 
 void UAbility::ChargeTimerExpiredCallback()
@@ -21,7 +28,7 @@ void UAbility::ChargeTimerExpiredCallback()
 	}
 }
 
-void UAbility::OnAbilityActivated()
+void UAbility::OnAbilityActivated(AShifterCharacter* PlayerCharacter)
 {
 	if(StackCurrent > 0 && !GetWorld()->GetTimerManager().IsTimerActive(ActiveTimer))
 		
@@ -39,7 +46,7 @@ void UAbility::OnAbilityActivated()
 	
 }
 
-void UAbility::OnAbilityExpired()
+void UAbility::OnAbilityExpired(AShifterCharacter* PlayerCharacter)
 {
 	GetWorld()->GetTimerManager().ClearTimer(ActiveTimer);
 	EnableCharging();

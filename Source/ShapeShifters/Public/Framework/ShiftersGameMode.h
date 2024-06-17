@@ -58,7 +58,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape);
-	
+
+	UPROPERTY()
+	AShifterCharacter* GameCharacterPtr;
 
 protected:
 	

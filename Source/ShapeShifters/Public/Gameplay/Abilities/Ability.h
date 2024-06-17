@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "Ability.generated.h"
 
+class AShifterCharacter;
 /**
  * 
  */
@@ -50,9 +51,9 @@ protected:
 public:
 
 	UFUNCTION(BlueprintCallable)
-	virtual void OnAbilityActivated();
+	virtual void OnAbilityActivated(AShifterCharacter* PlayerCharacter);
 	UFUNCTION()
-	virtual void OnAbilityExpired();
+	virtual void OnAbilityExpired(AShifterCharacter* PlayerCharacter);
 
 	UFUNCTION(BlueprintPure)
 	float GetAbilityChargePercent();

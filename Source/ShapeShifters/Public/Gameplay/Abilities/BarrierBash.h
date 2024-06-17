@@ -13,5 +13,9 @@ UCLASS()
 class SHAPESHIFTERS_API UBarrierBash : public UAbility
 {
 	GENERATED_BODY()
+
+public:
+
+	virtual void OnAbilityActivated(AShifterCharacter* PlayerCharacter) override;
 	
 };

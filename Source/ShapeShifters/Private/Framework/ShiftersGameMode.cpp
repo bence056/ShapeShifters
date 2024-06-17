@@ -26,7 +26,7 @@ void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShap
 			//cancel the ability:
 			if(UAbility** Ability = ShapeAbilityTable.Find(Player->GetShapeType()))
 			{
-				(*Ability)->OnAbilityExpired();
+				(*Ability)->OnAbilityExpired(Player);
 			}
 			Player->SetShapeType(ToShape);
 			ShiftTokens--;
