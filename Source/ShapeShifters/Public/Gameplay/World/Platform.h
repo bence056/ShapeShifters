@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Platform.generated.h"
 
+class APickup;
 class AObstacle;
 
 UENUM()

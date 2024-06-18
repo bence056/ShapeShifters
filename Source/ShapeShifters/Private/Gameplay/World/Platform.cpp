@@ -6,6 +6,7 @@
 #include "Framework/ShifterGameInstance.h"
 #include "Framework/ShiftersGameMode.h"
 #include "Gameplay/Obstacles/Obstacle.h"
+#include "Gameplay/Pickups/Pickup.h"
 #include "Gameplay/Player/ShifterCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -138,7 +139,7 @@ TArray<FGridData*> APlatform::GetCellsWithObstacle(EPlatformContentTypes Type)
 	TArray<FGridData*> RetArray;
 	for(auto& Cell : GridData)
 	{
-		if(Cell.ContainedObstacle && Cell.ObstacleType == Type)
+		if(Cell.ObstacleType == Type)
 		{
 			RetArray.Add(&Cell);
 		}
@@ -287,6 +288,26 @@ void APlatform::GeneratePlatformContents()
 				FGridData* ReplaceGrid = ToBreak[Stream.RandRange(0, ToBreak.Num()-1)];
 				SpawnObstacle(EPlatformContentTypes::None, ReplaceGrid->CellX, ReplaceGrid->CellY);
 			}
+		}
+
+		//phase 4, orbs:
+
+
+		// GetWorld()->SpawnActor<APickup>(ShiftersGameMode->HealthPickup, GetGridLocation(0, 0), FRotator::ZeroRotator);
+		
+		if(FMath::RandRange(0.f, 1.f) <= ShiftersGameMode->HealthOrbSpawnChance)
+		{
+			//spawn a health orb on the platform.
+		
+			TArray<FGridData*> Empty = GetCellsWithObstacle(EPlatformContentTypes::None);
+		
+			if(ShiftersGameMode->HealthPickup && Empty.Num() > 0)
+			{
+				FGridData* RandGrid = Empty[FMath::RandRange(0, Empty.Num()-1)];
+				APickup* Pickup = GetWorld()->SpawnActor<APickup>(ShiftersGameMode->HealthPickup, GetGridLocation(RandGrid->CellX, RandGrid->CellY), FRotator::ZeroRotator);
+				Pickup->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			}
+			
 		}
 		
 	}

@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "ShiftersGameMode.generated.h"
 
+class APickup;
 class UAbility;
 enum class EShapeType : uint8;
 class AShifterCharacter;
@@ -43,6 +44,12 @@ public:
 	int32 MinimumWallWidth;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int32 MaximumWallWidth;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float HealthOrbSpawnChance;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<APickup> HealthPickup;
 
 	//player related stuff
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

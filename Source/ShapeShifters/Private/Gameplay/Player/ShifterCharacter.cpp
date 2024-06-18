@@ -12,6 +12,7 @@
 #include "Framework/Input/CharacterShiftInputAction.h"
 #include "Gameplay/Abilities/Ability.h"
 #include "Gameplay/Obstacles/Obstacle.h"
+#include "Gameplay/Pickups/Pickup.h"
 #include "Gameplay/UMG/HealthPopup.h"
 #include "Gameplay/World/ShifterSpawner.h"
 #include "Kismet/GameplayStatics.h"
@@ -137,6 +138,10 @@ void AShifterCharacter::OnCollision(UPrimitiveComponent* OverlappedComponent, AA
 	{
 		CollidedObs->OnPlayerCollided(this);
 		OnPlayerCollided.Broadcast(CollidedObs);
+	}
+	if(APickup* Pickup = Cast<APickup>(OtherActor))
+	{
+		Pickup->OnPickupTriggered(this);
 	}
 }
 

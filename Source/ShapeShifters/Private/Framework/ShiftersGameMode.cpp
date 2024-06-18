@@ -19,6 +19,7 @@ AShiftersGameMode::AShiftersGameMode()
 	MaximumWallWidth = 8;
 	ShiftTokens = 50;
 	GameCharacterPtr = nullptr;
+	HealthOrbSpawnChance = 0.2f;
 }
 
 void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape)
