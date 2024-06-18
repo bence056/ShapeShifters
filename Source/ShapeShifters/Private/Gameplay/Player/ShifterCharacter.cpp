@@ -135,6 +135,7 @@ void AShifterCharacter::OnCollision(UPrimitiveComponent* OverlappedComponent, AA
 	if(AObstacle* CollidedObs = Cast<AObstacle>(OtherActor))
 	{
 		CollidedObs->OnPlayerCollided(this);
+		OnPlayerCollided.Broadcast(CollidedObs);
 	}
 }
 

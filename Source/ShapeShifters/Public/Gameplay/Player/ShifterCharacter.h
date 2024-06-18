@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "ShifterCharacter.generated.h"
 
+class AObstacle;
 class UCharacterShiftInputAction;
 class UBoxComponent;
 class AShifterSpawner;
@@ -14,6 +15,8 @@ class UInputMappingContext;
 class UCameraComponent;
 class UInputAction;
 class AGameCamera;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerCollided, AObstacle*, Obstacle);
 
 UENUM(Blueprintable, BlueprintType)
 enum class EShapeType : uint8
@@ -73,7 +76,9 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly)
 	float CurrentScore;
-	
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerCollided OnPlayerCollided;
 
 protected:
 	// Called when the game starts or when spawned
