@@ -12,6 +12,7 @@
 #include "Framework/Input/CharacterShiftInputAction.h"
 #include "Gameplay/Abilities/Ability.h"
 #include "Gameplay/Obstacles/Obstacle.h"
+#include "Gameplay/UMG/HealthPopup.h"
 #include "Gameplay/World/ShifterSpawner.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -209,10 +210,12 @@ void AShifterCharacter::SetPlayerHealth(float Health)
 {
 	if(Health >= 0)
 	{
-		PlayerHealth = Health;
-		if(PlayerHealth == 0)
+		if(AShifterPlayerController* PlayerController = Cast<AShifterPlayerController>(GetController()))
 		{
-			if(AShifterPlayerController* PlayerController = Cast<AShifterPlayerController>(GetController()))
+			PlayerController->CreateHealthPopup(PlayerHealth-Health);
+			
+			PlayerHealth = Health;
+			if(PlayerHealth == 0)
 			{
 				PlayerController->TriggerPlayerDeath();
 			}
@@ -224,7 +227,6 @@ void AShifterCharacter::ChangePlayerHealth(float DeltaHealth)
 {
 	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-
 		if(DeltaHealth >= 0.f)
 		{
 			DeltaHealth = FMath::Clamp(PlayerHealth+DeltaHealth, 0, ShiftersGameMode->PlayerMaxHealth);

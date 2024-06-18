@@ -6,10 +6,13 @@
 #include "Blueprint/UserWidget.h"
 #include "Framework/ShifterGameInstance.h"
 #include "Framework/ShiftersGameMode.h"
+#include "Gameplay/UMG/HealthPopup.h"
 #include "Gameplay/UMG/PlayerHud.h"
 #include "Kismet/GameplayStatics.h"
 #include "ShapeShifters/Public/Gameplay/Player/ShifterCharacter.h"
 #include "ShapeShifters/Public/Gameplay/World/ShifterSpawner.h"
+
+class UHealthPopup;
 
 void AShifterPlayerController::TogglePlayerHud(bool bOn)
 {
@@ -48,6 +51,14 @@ void AShifterPlayerController::TriggerPlayerDeath()
 		}
 		
 	}
+}
+
+void AShifterPlayerController::CreateHealthPopup(float Health)
+{
+	UHealthPopup* HealthPopup = CreateWidget<UHealthPopup>(this, HealthPopupWidget);
+	HealthPopup->DeltaHealth = Health;
+	HealthPopup->AddToViewport();
+	HealthPopup->TriggerPopup();
 }
 
 void AShifterPlayerController::BeginPlay()

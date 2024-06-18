@@ -34,6 +34,12 @@ public:
 	UFUNCTION()
 	void TriggerPlayerDeath();
 
+	UFUNCTION(BlueprintCallable)
+	void CreateHealthPopup(float Health);
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> HealthPopupWidget;
+
 protected:
 
 
