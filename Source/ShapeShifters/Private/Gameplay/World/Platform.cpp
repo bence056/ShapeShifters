@@ -3,8 +3,10 @@
 
 #include "Gameplay/World/Platform.h"
 
+#include "Framework/ShifterGameInstance.h"
 #include "Framework/ShiftersGameMode.h"
 #include "Gameplay/Obstacles/Obstacle.h"
+#include "Gameplay/Player/ShifterCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
 FGridData::FGridData()
@@ -42,6 +44,10 @@ void APlatform::BeginPlay()
 			GridData.Add(GD);
 		}
 	}
+	//setup material
+
+	// PlatformMesh->CreateAndSetMaterialInstanceDynamic(0);
+	
 	
 }
 
@@ -152,6 +158,14 @@ void APlatform::Tick(float DeltaTime)
 	{
 		SetActorLocation(GetActorLocation() + FVector(-1.f, 0.f, 0.f) * DeltaTime * GMode->PlatformMovementSpeed);
 	}
+
+	// if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	// {
+	// 	if(UShifterGameInstance* ShifterGameInstance = Cast<UShifterGameInstance>(GetGameInstance()))
+	// 	{
+	// 		PlatformMesh->SetScalarParameterValueOnMaterials("HSProgress", ShifterGameInstance->HighScore == 0 ? 0 : FMath::Clamp(ShiftersGameMode->GameCharacterPtr->CurrentScore / ShifterGameInstance->HighScore, 0, 1));
+	// 	}
+	// }
 	
 	
 }

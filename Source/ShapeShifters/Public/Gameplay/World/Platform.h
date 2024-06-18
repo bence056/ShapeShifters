@@ -57,6 +57,9 @@ public:
 	UPROPERTY()
 	TArray<int32> PreReservedRows;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UMaterialInterface* ScoreBasedMat;
+
 	
 protected:
 	// Called when the game starts or when spawned
