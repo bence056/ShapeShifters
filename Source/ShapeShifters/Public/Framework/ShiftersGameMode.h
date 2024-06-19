@@ -6,7 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "ShiftersGameMode.generated.h"
 
-enum class EPickupTypes;
+class UPowerup;
+enum class EPickupTypes : uint8;
 class APickup;
 class UAbility;
 enum class EShapeType : uint8;
@@ -52,6 +53,10 @@ public:
 	TMap<EPickupTypes, TSubclassOf<APickup>> PickupClasses;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pickups")
 	TMap<EPickupTypes, float> PickupWeights;
+
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerups")
+	TMap<EPickupTypes, TSubclassOf<UPowerup>> PowerupClasses;
 	
 
 	//player related stuff
@@ -70,11 +75,16 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape);
+	UFUNCTION(BlueprintCallable)
+	void CreateAndAssignPowerup(EPickupTypes Powerup);
+	UFUNCTION()
+	void NotifyPowerupExpired(UPowerup* Powerup);
 
 	UPROPERTY()
 	AShifterCharacter* GameCharacterPtr;
 
-	
+	UPROPERTY(BlueprintReadOnly)
+	TArray<UPowerup*> ActivePowerups;
 
 protected:
 	

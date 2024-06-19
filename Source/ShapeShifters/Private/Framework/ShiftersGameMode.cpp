@@ -3,8 +3,10 @@
 
 #include "ShapeShifters/Public/Framework/ShiftersGameMode.h"
 
+#include "Framework/ShifterPlayerController.h"
 #include "Gameplay/Abilities/Ability.h"
 #include "Gameplay/Player/ShifterCharacter.h"
+#include "Gameplay/Powerups/Powerup.h"
 
 AShiftersGameMode::AShiftersGameMode()
 {
@@ -23,7 +25,7 @@ AShiftersGameMode::AShiftersGameMode()
 
 void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape)
 {
-	if(Player->GetShapeType() != ToShape)
+	if(Player->GetShapeType() != ToShape && Player->CanCharacterMove())
 	{
 		
 		//cancel the ability:
@@ -41,9 +43,43 @@ void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShap
 	
 }
 
+void AShiftersGameMode::CreateAndAssignPowerup(EPickupTypes Powerup)
+{
+	for(auto& Pwr : ActivePowerups)
+	{
+		if(Pwr->PowerupType == Powerup)
+		{
+			//restart
+			Pwr->RestartPowerup();
+			return;
+		}
+	}
+	if(TSubclassOf<UPowerup>* PowerupClass = PowerupClasses.Find(Powerup))
+	{
+		UPowerup* PowerupObj = NewObject<UPowerup>(GameCharacterPtr, *PowerupClass);
+		PowerupObj->OnPowerupActivated();
+		ActivePowerups.Add(PowerupObj);
+		if(AShifterPlayerController* ShifterPlayerController = Cast<AShifterPlayerController>(GameCharacterPtr->GetController()))
+		{
+			ShifterPlayerController->UpdatePowerupsVisual();
+		}
+	}
+}
+
+void AShiftersGameMode::NotifyPowerupExpired(UPowerup* Powerup)
+{
+	if(ActivePowerups.Contains(Powerup))
+	{
+		ActivePowerups.Remove(Powerup);
+		if(AShifterPlayerController* ShifterPlayerController = Cast<AShifterPlayerController>(GameCharacterPtr->GetController()))
+		{
+			ShifterPlayerController->UpdatePowerupsVisual();
+		}
+	}
+}
+
 void AShiftersGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	PlatformMovementSpeed += DeltaSeconds * PlatformAcceleration;
-	// UE_LOG(LogTemp, Warning, TEXT("%f"), PlatformMovementSpeed);
 }

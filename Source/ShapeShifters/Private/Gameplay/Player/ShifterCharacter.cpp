@@ -38,6 +38,7 @@ AShifterCharacter::AShifterCharacter()
 	LaneIndex = 0;
 	CurrentScore = 0.f;
 	bCanMove = true;
+	CurrentPowerup = EPickupTypes::None;
 }
 
 // Called when the game starts or when spawned
@@ -116,6 +117,17 @@ void AShifterCharacter::HandleUseAbility(const FInputActionInstance& Action)
 	}
 }
 
+void AShifterCharacter::HandleUsePowerup(const FInputActionInstance& Action)
+{
+	if(Action.GetValue().Get<bool>())
+	{
+		if(CurrentPowerup != EPickupTypes::None)
+		{
+			UsePowerup();	
+		}
+	}
+}
+
 void AShifterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -128,6 +140,7 @@ void AShifterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(SwapCharacter2, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleSwapCharacter);
 		EnhancedInputComponent->BindAction(SwapCharacter3, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleSwapCharacter);
 		EnhancedInputComponent->BindAction(UseAbilityInput, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleUseAbility);
+		EnhancedInputComponent->BindAction(UsePowerupAction, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleUsePowerup);
 	}
 }
 
@@ -261,6 +274,11 @@ void AShifterCharacter::ToggleSideMovement(bool bOn)
 	bCanMove = bOn;
 }
 
+bool AShifterCharacter::CanCharacterMove()
+{
+	return bCanMove;
+}
+
 EShapeType AShifterCharacter::GetShapeType()
 {
 	return CurrentShapeType;
@@ -301,5 +319,22 @@ float AShifterCharacter::GetShieldPercentage()
 float AShifterCharacter::GetShieldHealth()
 {
 	return ShieldCurrentHealth;
+}
+
+void AShifterCharacter::AssignPowerup(EPickupTypes PickupType)
+{
+	CurrentPowerup = PickupType;
+}
+
+void AShifterCharacter::UsePowerup()
+{
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		if(CurrentPowerup != EPickupTypes::None)
+		{
+			ShiftersGameMode->CreateAndAssignPowerup(CurrentPowerup);
+		}
+	}
+	CurrentPowerup = EPickupTypes::None;
 }
 

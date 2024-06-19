@@ -9,8 +9,8 @@ AHealthPickup::AHealthPickup()
 	HealAmount = 20.f;
 }
 
-void AHealthPickup::OnPickupTriggered(AShifterCharacter* Character)
+void AHealthPickup::ActivateImmediateEffect(AShifterCharacter* Character)
 {
 	Character->ChangePlayerHealth(HealAmount);
-	Super::OnPickupTriggered(Character);
+	Super::ActivateImmediateEffect(Character);
 }

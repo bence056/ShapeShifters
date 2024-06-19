@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Gameplay/Pickups/Pickup.h"
 #include "ShifterCharacter.generated.h"
 
+enum class EPickupTypes : uint8;
 class AObstacle;
 class UCharacterShiftInputAction;
 class UBoxComponent;
@@ -65,6 +67,8 @@ public:
 	UCharacterShiftInputAction* SwapCharacter2;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
 	UCharacterShiftInputAction* SwapCharacter3;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
+	UInputAction* UsePowerupAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UBoxComponent* ObstacleCollisionBox;
@@ -79,6 +83,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerCollided OnPlayerCollided;
+
+	UPROPERTY(BlueprintReadOnly)
+	EPickupTypes CurrentPowerup;
 
 protected:
 	// Called when the game starts or when spawned
@@ -97,6 +104,8 @@ protected:
 	void HandleSwapCharacter(const FInputActionInstance& Action);
 	UFUNCTION()
 	void HandleUseAbility(const FInputActionInstance& Action);
+	UFUNCTION()
+	void HandleUsePowerup(const FInputActionInstance& Action);
 	
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
@@ -132,6 +141,8 @@ public:
 	void ChangePlayerHealth(float DeltaHealth);
 	UFUNCTION()
 	void ToggleSideMovement(bool bOn);
+	UFUNCTION(BlueprintPure)
+	bool CanCharacterMove();
 
 	UFUNCTION(BlueprintPure)
 	EShapeType GetShapeType();
@@ -149,5 +160,9 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	float GetShieldHealth();
-	
+	UFUNCTION(BlueprintCallable)
+	void AssignPowerup(EPickupTypes PickupType);
+
+	UFUNCTION(BlueprintCallable)
+	void UsePowerup();
 };

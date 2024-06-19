@@ -21,6 +21,7 @@ APickup::APickup()
 	OwningPlatform = nullptr;
 	PosX = 0;
 	PosY = 0;
+	bImmediateEffect = true;
 
 }
 
@@ -36,12 +37,29 @@ void APickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	PickupMesh->SetRelativeLocation(FVector(0.f,0.f, ((FMath::Sin(GetWorld()->GetTimeSeconds()*5.f)+1)/2)*50.f));
+	
+	PickupMesh->SetRelativeLocation(FVector(0.f,0.f, ((FMath::Sin(GetGameTimeSinceCreation()*5.f)+1)/2)*50.f));
 
+}
+
+void APickup::ActivateImmediateEffect(AShifterCharacter* Character)
+{
+	//do nothin.
 }
 
 void APickup::OnPickupTriggered(AShifterCharacter* Character)
 {
-	Destroy();
+	if(bImmediateEffect)
+	{
+		ActivateImmediateEffect(Character);
+		Destroy();
+	}else
+	{
+		if(Character->CurrentPowerup == EPickupTypes::None)
+		{
+			Character->AssignPowerup(PickupType);
+			Destroy();
+		}
+	}
 }
 

@@ -61,6 +61,18 @@ void AShifterPlayerController::CreateHealthPopup(float Health)
 	HealthPopup->TriggerPopup();
 }
 
+void AShifterPlayerController::UpdatePowerupsVisual()
+{
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		//do the ui shit.
+		if(PlayerHud)
+		{
+			PlayerHud->UpdatePowerupsUI();
+		}
+	}
+}
+
 void AShifterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Platform.generated.h"
 
-enum class EPickupTypes;
+enum class EPickupTypes : uint8;
 class APickup;
 class AObstacle;
 

@@ -21,6 +21,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float HealAmount;
 
-	virtual void OnPickupTriggered(AShifterCharacter* Character) override;
+	virtual void ActivateImmediateEffect(AShifterCharacter* Character) override;
 	
 };

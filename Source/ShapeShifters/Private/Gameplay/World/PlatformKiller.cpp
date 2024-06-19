@@ -29,10 +29,14 @@ void APlatformKiller::BeginPlay()
 void APlatformKiller::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if(OtherActor->GetClass()->IsChildOf(KillClass))
+	for(auto& KC : KillClasses)
 	{
-		OtherActor->Destroy();
+		if(OtherActor->GetClass()->IsChildOf(KC))
+		{
+			OtherActor->Destroy();
+		}
 	}
+	
 }
 
 // Called every frame

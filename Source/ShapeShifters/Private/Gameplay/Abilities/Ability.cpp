@@ -52,8 +52,9 @@ void UAbility::ExpireAbility(AShifterCharacter* PlayerCharacter)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ActiveTimer);
 		EnableCharging();
+		OnAbilityExpired(PlayerCharacter);
 	}
-	OnAbilityExpired(PlayerCharacter);
+	
 }
 
 void UAbility::OnAbilityActivated(AShifterCharacter* PlayerCharacter)

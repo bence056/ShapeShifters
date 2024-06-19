@@ -11,7 +11,7 @@ class AShifterCharacter;
 
 
 UENUM()
-enum class EPickupTypes
+enum class EPickupTypes : uint8
 {
 	None,
 	Health,
@@ -34,7 +34,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	USceneComponent* RootComp;
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bImmediateEffect;
+	
+	
 	UPROPERTY()
 	APlatform* OwningPlatform;
 
@@ -46,7 +49,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UStaticMeshComponent* PickupMesh;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	EPickupTypes PickupType;
 	
 protected:
@@ -57,7 +60,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	virtual void ActivateImmediateEffect(AShifterCharacter* Character);
+	
 	UFUNCTION(BlueprintCallable)
-	virtual void OnPickupTriggered(AShifterCharacter* Character);
+	void OnPickupTriggered(AShifterCharacter* Character);
 
 };

@@ -14,4 +14,7 @@ class SHAPESHIFTERS_API UPlayerHud : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdatePowerupsUI();
 };

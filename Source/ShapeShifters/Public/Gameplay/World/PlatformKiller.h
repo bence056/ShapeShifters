@@ -21,7 +21,7 @@ public:
 	UBoxComponent* KillArea;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> KillClass;
+	TArray<TSubclassOf<AActor>> KillClasses;
 
 protected:
 	// Called when the game starts or when spawned

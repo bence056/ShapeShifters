@@ -36,7 +36,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CreateHealthPopup(float Health);
-	
+	UFUNCTION()
+	void UpdatePowerupsVisual();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> HealthPopupWidget;
 
