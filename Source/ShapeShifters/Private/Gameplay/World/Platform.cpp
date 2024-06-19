@@ -350,21 +350,13 @@ void APlatform::GeneratePlatformContents()
 			TArray<EPickupTypes> PickupTypes;
 			ShiftersGameMode->PickupClasses.GetKeys(PickupTypes);
 			
-			TMap<EPickupTypes, float> FixedPickupMap;
-			for(auto& Pair : ShiftersGameMode->PickupWeights.Array())
-			{
-				//remove Null pickup.
-				if(Pair.Key != EPickupTypes::None && PickupTypes.Contains(Pair.Key))
-				{
-					FixedPickupMap.Add(Pair);
-				}
-			}
+			//note: keep none as an option. it will allow us to give a chance to no pickup spawning on the platform.
 		
 			EPickupTypes PickupType = EPickupTypes::None;
 			float SumWeight = 0;
-			for(auto& Pair : FixedPickupMap.Array()) SumWeight += Pair.Value;
+			for(auto& Pair : ShiftersGameMode->PickupWeights.Array()) SumWeight += Pair.Value;
 			float RandomWeight = Stream.RandRange(0.f, SumWeight);
-			for(auto& Pair : FixedPickupMap.Array())
+			for(auto& Pair : ShiftersGameMode->PickupWeights.Array())
 			{
 				if(RandomWeight <= Pair.Value)
 				{
