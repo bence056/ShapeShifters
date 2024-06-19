@@ -18,6 +18,14 @@ FGridData::FGridData()
 	ObstacleType = EPlatformContentTypes::None;
 }
 
+FPickupData::FPickupData()
+{
+	CellX = 0;
+	CellY = 0;
+	ContainedPickup = nullptr;
+	PickupType = EPickupTypes::None;
+}
+
 // Sets default values
 APlatform::APlatform()
 {
@@ -43,6 +51,12 @@ void APlatform::BeginPlay()
 			GD.ContainedObstacle = nullptr;
 			GD.ObstacleType = EPlatformContentTypes::None;
 			GridData.Add(GD);
+			FPickupData PD = FPickupData();
+			PD.CellX = x;
+			PD.CellY = y;
+			PD.ContainedPickup = nullptr;
+			PD.PickupType = EPickupTypes::None;
+			PickupGridData.Add(PD);
 		}
 	}
 	//setup material
@@ -96,6 +110,31 @@ void APlatform::SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y)
 	}
 }
 
+void APlatform::SpawnPickup(EPickupTypes Type, int32 X, int32 Y)
+{
+	//delete alr existing obj.
+	FPickupData* TgtGrid = GetPickupDataAt(X,Y);
+	if(TgtGrid && TgtGrid->ContainedPickup)
+	{
+		TgtGrid->ContainedPickup->Destroy();
+		TgtGrid->ContainedPickup = nullptr;
+		TgtGrid->PickupType = EPickupTypes::None;
+	}
+	if(Type != EPickupTypes::None)
+	{
+		if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			APickup* Pickup = GetWorld()->SpawnActor<APickup>(*ShiftersGameMode->PickupClasses.Find(Type), GetGridLocation(X, Y), FRotator::ZeroRotator);
+			Pickup->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			Pickup->OwningPlatform = this;
+			Pickup->PosX = X;
+			Pickup->PosY = Y;
+			Pickup->PickupType = Type;
+			SetPickupDataAt(X, Y, Pickup, Type);
+		}
+	}
+}
+
 TArray<FGridData*> APlatform::GetEmptyInRow(int32 X)
 {
 	TArray<FGridData*> FreeCells;
@@ -129,6 +168,18 @@ void APlatform::SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle, EPlatformCon
 		{
 			Entry.ContainedObstacle = NewObstacle;
 			Entry.ObstacleType = Type;
+		}
+	}	
+}
+
+void APlatform::SetPickupDataAt(int32 X, int32 Y, APickup* NewPickup, EPickupTypes Type)
+{
+	for(auto& Entry : PickupGridData)
+	{
+		if(Entry.CellX == X && Entry.CellY == Y)
+		{
+			Entry.ContainedPickup = NewPickup;
+			Entry.PickupType = Type;
 		}
 	}	
 }
@@ -247,7 +298,7 @@ void APlatform::GeneratePlatformContents()
 			float RandomWeight = Stream.RandRange(0.f, SumWeight);
 			for(auto& Pair : FixedMap.Array())
 			{
-				if(RandomWeight < Pair.Value)
+				if(RandomWeight <= Pair.Value)
 				{
 					Type = Pair.Key;
 					break;
@@ -293,21 +344,43 @@ void APlatform::GeneratePlatformContents()
 		//phase 4, orbs:
 
 
-		// GetWorld()->SpawnActor<APickup>(ShiftersGameMode->HealthPickup, GetGridLocation(0, 0), FRotator::ZeroRotator);
-		
-		if(FMath::RandRange(0.f, 1.f) <= ShiftersGameMode->HealthOrbSpawnChance)
+		for(int32 i=0; i<ShiftersGameMode->PickupMaxSpawnTrials; i++)
 		{
-			//spawn a health orb on the platform.
-		
-			TArray<FGridData*> Empty = GetCellsWithObstacle(EPlatformContentTypes::None);
-		
-			if(ShiftersGameMode->HealthPickup && Empty.Num() > 0)
-			{
-				FGridData* RandGrid = Empty[FMath::RandRange(0, Empty.Num()-1)];
-				APickup* Pickup = GetWorld()->SpawnActor<APickup>(ShiftersGameMode->HealthPickup, GetGridLocation(RandGrid->CellX, RandGrid->CellY), FRotator::ZeroRotator);
-				Pickup->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-			}
+			//select type;
+			TArray<EPickupTypes> PickupTypes;
+			ShiftersGameMode->PickupClasses.GetKeys(PickupTypes);
 			
+			TMap<EPickupTypes, float> FixedPickupMap;
+			for(auto& Pair : ShiftersGameMode->PickupWeights.Array())
+			{
+				//remove Null pickup.
+				if(Pair.Key != EPickupTypes::None && PickupTypes.Contains(Pair.Key))
+				{
+					FixedPickupMap.Add(Pair);
+				}
+			}
+		
+			EPickupTypes PickupType = EPickupTypes::None;
+			float SumWeight = 0;
+			for(auto& Pair : FixedPickupMap.Array()) SumWeight += Pair.Value;
+			float RandomWeight = Stream.RandRange(0.f, SumWeight);
+			for(auto& Pair : FixedPickupMap.Array())
+			{
+				if(RandomWeight <= Pair.Value)
+				{
+					PickupType = Pair.Key;
+					break;
+				}
+				RandomWeight -= Pair.Value;
+			}
+		
+			TArray<TPair<int32, int32>> Empty = GetEmptyCells();
+		
+			if(ShiftersGameMode->PickupClasses.Contains(PickupType) && Empty.Num() > 0)
+			{
+				TPair<int32, int32> RandGrid = Empty[FMath::RandRange(0, Empty.Num()-1)];
+				SpawnPickup(PickupType, RandGrid.Key, RandGrid.Value);
+			}
 		}
 		
 	}
@@ -379,9 +452,37 @@ TArray<FGridData*> APlatform::GetAllowedWallReplacements(EPlatformContentTypes T
 	return ReturnGrid;
 }
 
+
+TArray<TPair<int32, int32>> APlatform::GetEmptyCells()
+{
+	TArray<TPair<int32, int32>> EmptyAll;
+
+	for(auto& GD : GetCellsWithObstacle(EPlatformContentTypes::None))
+	{
+		if(GetPickupDataAt(GD->CellX, GD->CellY)->PickupType == EPickupTypes::None)
+		{
+			EmptyAll.Add(TPair<int32, int32>(GD->CellX, GD->CellY));
+		}
+	}
+	return EmptyAll;
+}
+
+
 FGridData* APlatform::GetCellDataAt(int32 X, int32 Y)
 {
 	for(auto& Cell : GridData)
+	{
+		if(Cell.CellX == X && Cell.CellY == Y)
+		{
+			return &Cell;
+		}
+	}
+	return nullptr;
+}
+
+FPickupData* APlatform::GetPickupDataAt(int32 X, int32 Y)
+{
+	for(auto& Cell : PickupGridData)
 	{
 		if(Cell.CellX == X && Cell.CellY == Y)
 		{

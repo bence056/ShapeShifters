@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Platform.generated.h"
 
+enum class EPickupTypes;
 class APickup;
 class AObstacle;
 
@@ -21,20 +22,39 @@ enum class EPlatformContentTypes : uint8
 };
 
 USTRUCT(Blueprintable, BlueprintType)
-struct FGridData
+  struct FGridData
+  {
+  	GENERATED_BODY()
+  
+  	FGridData();
+  
+  	UPROPERTY()
+  	int32 CellX;
+  	UPROPERTY()
+  	int32 CellY;
+  	UPROPERTY()
+  	AObstacle* ContainedObstacle;
+  	UPROPERTY()
+  	EPlatformContentTypes ObstacleType;
+  	
+  	
+  };
+
+USTRUCT(Blueprintable, BlueprintType)
+struct FPickupData
 {
 	GENERATED_BODY()
 
-	FGridData();
+	FPickupData();
 
 	UPROPERTY()
 	int32 CellX;
 	UPROPERTY()
 	int32 CellY;
 	UPROPERTY()
-	AObstacle* ContainedObstacle;
+	APickup* ContainedPickup;
 	UPROPERTY()
-	EPlatformContentTypes ObstacleType;
+	EPickupTypes PickupType;
 	
 	
 };
@@ -71,19 +91,27 @@ protected:
 	UPROPERTY()
 	TArray<FGridData> GridData;
 
+	UPROPERTY()
+	TArray<FPickupData> PickupGridData;
+
 	UFUNCTION(BlueprintCallable)
 	FVector GetGridLocation(int32 X, int32 Y);
 public:
 	UFUNCTION(BlueprintCallable)
 	void SpawnObstacle(EPlatformContentTypes Type, int32 X, int32 Y);
+	UFUNCTION(BlueprintCallable)
+	void SpawnPickup(EPickupTypes Type, int32 X, int32 Y);
 	TArray<FGridData*> GetEmptyInRow(int32 X);
 	UFUNCTION()
 	bool IsGridOccupiedAt(int32 X, int32 Y);
 	UFUNCTION()
 	void SetDataAt(int32 X, int32 Y, AObstacle* NewObstacle, EPlatformContentTypes Type);
+	UFUNCTION()
+	void SetPickupDataAt(int32 X, int32 Y, APickup* NewPickup, EPickupTypes Type);
 	
 	TArray<FGridData*> GetCellsWithObstacle(EPlatformContentTypes Type);
 	FGridData* GetCellDataAt(int32 X, int32 Y);
+	FPickupData* GetPickupDataAt(int32 X, int32 Y);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	bool bUseCustomSeed;
@@ -95,6 +123,8 @@ public:
 	
 	TArray<FGridData*> GetAllowedWallReplacements(EPlatformContentTypes Type);
 
+	TArray<TPair<int32, int32>> GetEmptyCells();
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -10,13 +10,17 @@ APickup::APickup()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-
+	
 	RootComp = CreateDefaultSubobject<USceneComponent>(TEXT("RootComp"));
 	SetRootComponent(RootComp);
 	PickupMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PickupMesh"));
 	PickupMesh->SetupAttachment(GetRootComponent());
 	PickupMesh->SetGenerateOverlapEvents(true);
+
+	PickupType = EPickupTypes::None;
+	OwningPlatform = nullptr;
+	PosX = 0;
+	PosY = 0;
 
 }
 

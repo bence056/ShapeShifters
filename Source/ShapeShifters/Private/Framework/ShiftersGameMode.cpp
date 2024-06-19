@@ -17,31 +17,28 @@ AShiftersGameMode::AShiftersGameMode()
 	MaxWallSpawnTrials = 3;
 	MinimumWallWidth = 1;
 	MaximumWallWidth = 8;
-	ShiftTokens = 50;
 	GameCharacterPtr = nullptr;
-	HealthOrbSpawnChance = 0.2f;
+	PickupMaxSpawnTrials = 2;
 }
 
 void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape)
 {
 	if(Player->GetShapeType() != ToShape)
 	{
-		if(ShiftTokens > 0)
+		
+		//cancel the ability:
+		if(UAbility** Ability = ShapeAbilityTable.Find(Player->GetShapeType()))
 		{
-			//cancel the ability:
-			if(UAbility** Ability = ShapeAbilityTable.Find(Player->GetShapeType()))
-			{
-				(*Ability)->ExpireAbility(Player);
-			}
-			Player->SetShapeType(ToShape);
-			ShiftTokens--;
-			if(UStaticMesh** NewShape = ShapeMeshTable.Find(ToShape))
-			{
-				Player->ShapeMesh->SetStaticMesh(*NewShape);
-			}
-			Player->OnPlayerShifted(ToShape);
+			(*Ability)->ExpireAbility(Player);
 		}
+		Player->SetShapeType(ToShape);
+		if(UStaticMesh** NewShape = ShapeMeshTable.Find(ToShape))
+		{
+			Player->ShapeMesh->SetStaticMesh(*NewShape);
+		}
+		Player->OnPlayerShifted(ToShape);
 	}
+	
 }
 
 void AShiftersGameMode::Tick(float DeltaSeconds)

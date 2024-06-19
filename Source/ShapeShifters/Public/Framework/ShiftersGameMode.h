@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "ShiftersGameMode.generated.h"
 
+enum class EPickupTypes;
 class APickup;
 class UAbility;
 enum class EShapeType : uint8;
@@ -24,45 +25,47 @@ public:
 
 	AShiftersGameMode();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Platform")
 	float PlatformMovementSpeed;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Platform")
 	float PlatformAcceleration = 1;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Obstacles")
 	TMap<EPlatformContentTypes, TSubclassOf<AObstacle>> ObstacleClasses;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Obstacles")
 	TMap<EPlatformContentTypes, float> ObstacleWeights;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Obstacles|Wall")
 	int32 MaxWallSpawnTrials;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Obstacles")
 	int32 MaxObstacleReplacementTrials;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Obstacles|Wall")
 	int32 MinimumWallGap;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Obstacles|Wall")
 	int32 MinimumWallWidth;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Obstacles|Wall")
 	int32 MaximumWallWidth;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	float HealthOrbSpawnChance;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSubclassOf<APickup> HealthPickup;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pickups")
+	int32 PickupMaxSpawnTrials;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pickups")
+	TMap<EPickupTypes, TSubclassOf<APickup>> PickupClasses;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pickups")
+	TMap<EPickupTypes, float> PickupWeights;
+	
 
 	//player related stuff
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Player")
 	float PlayerMaxHealth = 100;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Player")
 	float ShieldMaxHealth = 50;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Player")
 	float PlayerScoreMultiplier = 0.003;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Player")
 	TArray<EShapeType> ShapeLoadout;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Player")
 	TMap<EShapeType, UStaticMesh*> ShapeMeshTable;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Instanced)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Instanced, Category = "Player")
 	TMap<EShapeType, UAbility*> ShapeAbilityTable;
 	
 	UFUNCTION(BlueprintCallable)
@@ -78,10 +81,8 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 	//game related stuff.
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Game")
 	TArray<EShapeType> UnlockedShapes;
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-	int32 ShiftTokens;
 	
 	
 };

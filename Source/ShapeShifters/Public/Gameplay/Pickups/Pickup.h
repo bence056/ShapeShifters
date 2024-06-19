@@ -6,7 +6,22 @@
 #include "GameFramework/Actor.h"
 #include "Pickup.generated.h"
 
+class APlatform;
 class AShifterCharacter;
+
+
+UENUM()
+enum class EPickupTypes
+{
+	None,
+	Health,
+	Clockwork,
+	Xray,
+	TripleXP,
+	Wireframe,
+	Analyze,
+	Fly
+};
 
 UCLASS()
 class SHAPESHIFTERS_API APickup : public AActor
@@ -19,10 +34,21 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	USceneComponent* RootComp;
+
+	UPROPERTY()
+	APlatform* OwningPlatform;
+
+	UPROPERTY()
+	int32 PosX;
+	UPROPERTY()
+	int32 PosY;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UStaticMeshComponent* PickupMesh;
 
+	UPROPERTY(BlueprintReadOnly)
+	EPickupTypes PickupType;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
