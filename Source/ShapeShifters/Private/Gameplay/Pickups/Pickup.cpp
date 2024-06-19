@@ -36,11 +36,12 @@ void APickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	PickupMesh->SetRelativeLocation(FVector(0.f,0.f, ((FMath::Sin(GetWorld()->GetTimeSeconds()*5.f)+1)/2)*50.f));
+
 }
 
 void APickup::OnPickupTriggered(AShifterCharacter* Character)
 {
-	Character->ChangePlayerHealth(20.f);
 	Destroy();
 }
 
