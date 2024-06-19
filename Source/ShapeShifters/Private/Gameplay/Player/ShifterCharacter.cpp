@@ -128,6 +128,36 @@ void AShifterCharacter::HandleUsePowerup(const FInputActionInstance& Action)
 	}
 }
 
+void AShifterCharacter::HandleSwapCharacterLoop(const FInputActionInstance& Action)
+{
+	float Dir = Action.GetValue().Get<float>();
+	int32 ShapeIndex = -1;
+
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		for(int32 i = 0; i<ShiftersGameMode->ShapeLoadout.Num(); i++)
+		{
+			if(ShiftersGameMode->ShapeLoadout[i] == CurrentShapeType)
+			{
+				ShapeIndex = i;
+			}
+		}
+
+		if(ShapeIndex >= 0)
+		{
+		
+			if(Dir > 0.f)
+			{
+				ShapeIndex = (ShapeIndex+4)%3;
+			}else if(Dir < 0.f)
+			{
+				ShapeIndex = (ShapeIndex+2)%3;
+			}
+		}
+		ShiftersGameMode->ShiftPlayer(this, ShiftersGameMode->ShapeLoadout[ShapeIndex]);
+	}
+}
+
 void AShifterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -141,6 +171,7 @@ void AShifterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(SwapCharacter3, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleSwapCharacter);
 		EnhancedInputComponent->BindAction(UseAbilityInput, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleUseAbility);
 		EnhancedInputComponent->BindAction(UsePowerupAction, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleUsePowerup);
+		EnhancedInputComponent->BindAction(ChangeShapeAction, ETriggerEvent::Triggered, this, &AShifterCharacter::HandleSwapCharacterLoop);
 	}
 }
 

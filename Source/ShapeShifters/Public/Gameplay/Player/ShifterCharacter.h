@@ -69,6 +69,8 @@ public:
 	UCharacterShiftInputAction* SwapCharacter3;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
 	UInputAction* UsePowerupAction;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input | Actions")
+	UInputAction* ChangeShapeAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UBoxComponent* ObstacleCollisionBox;
@@ -106,6 +108,8 @@ protected:
 	void HandleUseAbility(const FInputActionInstance& Action);
 	UFUNCTION()
 	void HandleUsePowerup(const FInputActionInstance& Action);
+	UFUNCTION()
+	void HandleSwapCharacterLoop(const FInputActionInstance& Action);
 	
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
