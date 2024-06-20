@@ -20,6 +20,7 @@ enum class EPickupTypes : uint8
 	TripleXP,
 	Wireframe,
 	Analyze,
+	ExtraLife,
 	Fly
 };
 

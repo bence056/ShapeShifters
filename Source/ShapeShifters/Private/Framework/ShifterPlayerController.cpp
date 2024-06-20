@@ -53,6 +53,11 @@ void AShifterPlayerController::TriggerPlayerDeath()
 	}
 }
 
+void AShifterPlayerController::TriggerPlayerRebirth()
+{
+	
+}
+
 void AShifterPlayerController::CreateHealthPopup(float Health)
 {
 	UHealthPopup* HealthPopup = CreateWidget<UHealthPopup>(this, HealthPopupWidget);

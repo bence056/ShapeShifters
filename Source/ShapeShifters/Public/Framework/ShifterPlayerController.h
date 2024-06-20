@@ -33,6 +33,8 @@ public:
 	void TogglePlayerHud(bool bOn);
 	UFUNCTION()
 	void TriggerPlayerDeath();
+	UFUNCTION()
+	void TriggerPlayerRebirth();
 
 	UFUNCTION(BlueprintCallable)
 	void CreateHealthPopup(float Health);

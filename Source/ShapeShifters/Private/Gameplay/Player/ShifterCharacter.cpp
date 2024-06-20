@@ -39,6 +39,7 @@ AShifterCharacter::AShifterCharacter()
 	CurrentScore = 0.f;
 	bCanMove = true;
 	CurrentPowerup = EPickupTypes::None;
+	bHasExtraLife = false;
 }
 
 // Called when the game starts or when spawned
@@ -71,6 +72,11 @@ void AShifterCharacter::PawnClientRestart()
 			InputSystem->AddMappingContext(InputMappingContext, 1);
 		}
 	}
+}
+
+void AShifterCharacter::OnIFrameEnd()
+{
+	ObstacleCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 void AShifterCharacter::HandleLaneMovement(const FInputActionInstance& Action)
@@ -266,7 +272,21 @@ void AShifterCharacter::SetPlayerHealth(float Health)
 			PlayerHealth = Health;
 			if(PlayerHealth == 0)
 			{
-				PlayerController->TriggerPlayerDeath();
+				if(bHasExtraLife)
+				{
+					bHasExtraLife = false;
+					if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+					{
+						//Cancel death.
+						PlayerHealth = ShiftersGameMode->PlayerMaxHealth;
+						ObstacleCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+						GetWorld()->GetTimerManager().SetTimer(RebirthInvTimer, this, &AShifterCharacter::OnIFrameEnd, 5.f);
+						PlayerController->TriggerPlayerRebirth();
+					}
+				}else
+				{
+					PlayerController->TriggerPlayerDeath();	
+				}
 			}
 		}
 	}
@@ -367,5 +387,22 @@ void AShifterCharacter::UsePowerup()
 		}
 	}
 	CurrentPowerup = EPickupTypes::None;
+}
+
+void AShifterCharacter::GrantExtraLife()
+{
+	bHasExtraLife = true;
+}
+
+float AShifterCharacter::GetIFrameTimerPercent()
+{
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		if(GetWorldTimerManager().IsTimerActive(RebirthInvTimer))
+		{
+			return GetWorldTimerManager().GetTimerRemaining(RebirthInvTimer) / 5.f;
+		}
+	}
+	return 0.f;
 }
 

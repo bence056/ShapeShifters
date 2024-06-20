@@ -94,11 +94,20 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY()
+	FTimerHandle RebirthInvTimer;
+	
+	UPROPERTY()
 	FVector TargetLocation;
 	UPROPERTY()
 	bool bCanMove;
+	UPROPERTY(BlueprintReadOnly)
+	bool bHasExtraLife;
 
 	virtual void PawnClientRestart() override;
+
+	UFUNCTION()
+	void OnIFrameEnd();
+	
 	UFUNCTION()
 	void HandleLaneMovement(const FInputActionInstance& Action);
 
@@ -169,4 +178,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void UsePowerup();
+
+	UFUNCTION(BlueprintCallable)
+	void GrantExtraLife();
+
+	UFUNCTION(BlueprintPure)
+	float GetIFrameTimerPercent();
+	
 };
