@@ -48,17 +48,7 @@ void AShifterCharacter::BeginPlay()
 	Super::BeginPlay();
 	TargetLocation = GetActorLocation();
 	ObstacleCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AShifterCharacter::OnCollision);
-	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
-	{
-		ShapeMesh->SetStaticMesh(*ShiftersGameMode->ShapeMeshTable.Find(ShiftersGameMode->ShapeLoadout[0]));
-		for(auto& Shape : ShiftersGameMode->ShapeLoadout)
-		{
-			if(UAbility** Ability = ShiftersGameMode->ShapeAbilityTable.Find(Shape))
-			{
-				(*Ability)->InitializeAbility(false);
-			}
-		}
-	}
+	// InitializePlayerShape();
 }
 
 void AShifterCharacter::PawnClientRestart()
@@ -211,7 +201,7 @@ void AShifterCharacter::Tick(float DeltaTime)
 	{
 		if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 		{
-			CurrentScore += (DeltaTime * GameMode->PlatformMovementSpeed * GameMode->PlayerScoreMultiplier);
+			CurrentScore += (DeltaTime * GameMode->GetPlatformSpeed() * GameMode->PlayerScoreMultiplier);
 		}
 	}
 	
@@ -404,5 +394,20 @@ float AShifterCharacter::GetIFrameTimerPercent()
 		}
 	}
 	return 0.f;
+}
+
+void AShifterCharacter::InitializePlayerShape()
+{
+	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		ShapeMesh->SetStaticMesh(*ShiftersGameMode->ShapeMeshTable.Find(ShiftersGameMode->ShapeLoadout[0]));
+		for(auto& Shape : ShiftersGameMode->ShapeLoadout)
+		{
+			if(UAbility** Ability = ShiftersGameMode->ShapeAbilityTable.Find(Shape))
+			{
+				(*Ability)->InitializeAbility(false);
+			}
+		}
+	}
 }
 

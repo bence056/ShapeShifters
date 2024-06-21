@@ -73,6 +73,9 @@ public:
 	UFUNCTION()
 	void DisableCharging();
 
+	UFUNCTION(BlueprintCallable)
+	void ResetAbility();
+	
 	UFUNCTION(BlueprintPure)
 	bool IsAbilityActive();
 	

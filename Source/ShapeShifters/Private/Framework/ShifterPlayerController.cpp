@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Framework/ShifterGameInstance.h"
 #include "Framework/ShiftersGameMode.h"
+#include "Gameplay/UMG/CheckpointWidget.h"
 #include "Gameplay/UMG/HealthPopup.h"
 #include "Gameplay/UMG/PlayerHud.h"
 #include "Kismet/GameplayStatics.h"
@@ -35,7 +36,7 @@ void AShifterPlayerController::TriggerPlayerDeath()
 	if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 	{
 		//stop the platforms.
-		GameMode->PlatformMovementSpeed = 0.f;
+		GameMode->SetPlatformSpeed(0.f);
 		GameMode->PlatformAcceleration = 0.f;
 		
 	}
@@ -55,7 +56,23 @@ void AShifterPlayerController::TriggerPlayerDeath()
 
 void AShifterPlayerController::TriggerPlayerRebirth()
 {
-	
+	if(ShifterClass)
+	{
+		if(AShifterSpawner* Locator = Cast<AShifterSpawner>(UGameplayStatics::GetActorOfClass(GetWorld(), AShifterSpawner::StaticClass())))
+		{
+			int32 RandSpawnSlot = FMath::RandRange(0, Locator->GridWidth-1);
+			ShifterCharacter = GetWorld()->SpawnActor<AShifterCharacter>(ShifterClass, Locator->GetGridLocationByIndex(RandSpawnSlot), Locator->GetActorRotation());
+			ShifterCharacter->LaneIndex = RandSpawnSlot;
+			Possess(ShifterCharacter);
+			SetShowMouseCursor(true);
+			if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+			{
+				GameMode->GameCharacterPtr = ShifterCharacter;
+				GameMode->PauseAtCheckpoint(true);
+			}
+		}
+				
+	}
 }
 
 void AShifterPlayerController::CreateHealthPopup(float Health)
@@ -78,25 +95,27 @@ void AShifterPlayerController::UpdatePowerupsVisual()
 	}
 }
 
+void AShifterPlayerController::TriggerCheckpointPaused(bool bPaused)
+{
+	if(PauseWidgetClass && !PauseWidget)
+	{
+		PauseWidget = CreateWidget<UCheckpointWidget>(this, PauseWidgetClass);
+	}
+	if(bPaused)
+	{
+		TogglePlayerHud(false);
+		PauseWidget->AddToViewport();
+	}
+	else
+	{
+		PauseWidget->RemoveFromParent();
+		TogglePlayerHud(true);
+	}
+}
+
 void AShifterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if(ShifterClass)
-	{
-		if(AShifterSpawner* Locator = Cast<AShifterSpawner>(UGameplayStatics::GetActorOfClass(GetWorld(), AShifterSpawner::StaticClass())))
-		{
-			int32 RandSpawnSlot = FMath::RandRange(0, Locator->GridWidth-1);
-			ShifterCharacter = GetWorld()->SpawnActor<AShifterCharacter>(ShifterClass, Locator->GetGridLocationByIndex(RandSpawnSlot), Locator->GetActorRotation());
-			ShifterCharacter->LaneIndex = RandSpawnSlot;
-			Possess(ShifterCharacter);
-			if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
-			{
-				GameMode->GameCharacterPtr = ShifterCharacter;
-			}
-			TogglePlayerHud(true);
-		}
-				
-	}
-	
+	TriggerPlayerRebirth();
 }

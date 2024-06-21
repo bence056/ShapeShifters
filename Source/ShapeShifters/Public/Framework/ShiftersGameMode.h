@@ -25,9 +25,6 @@ class SHAPESHIFTERS_API AShiftersGameMode : public AGameModeBase
 public:
 
 	AShiftersGameMode();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Platform")
-	float PlatformMovementSpeed;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Platform")
 	float PlatformAcceleration = 1;
 
@@ -86,13 +83,37 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<UPowerup*> ActivePowerups;
 
+	UFUNCTION(BlueprintCallable)
+	void EquipShape(EShapeType Type);
+	
+	UFUNCTION(BlueprintCallable)
+	void UnequipShape(EShapeType Type);
+
+	UFUNCTION(BlueprintCallable)
+	void PauseAtCheckpoint(bool bPause);
+
+
+	UFUNCTION(BlueprintCallable)
+	float GetPlatformSpeed();
+
+	UFUNCTION(BlueprintCallable)
+	void SetPlatformSpeed(float Speed);
+
+	
 protected:
 	
 	virtual void Tick(float DeltaSeconds) override;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Platform")
+	float PlatformMovementSpeed;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bCheckpointPaused;
+
 	//game related stuff.
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Game")
 	TArray<EShapeType> UnlockedShapes;
+
 	
 	
 };

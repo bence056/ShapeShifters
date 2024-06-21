@@ -208,7 +208,7 @@ void APlatform::Tick(float DeltaTime)
 
 	if(AShiftersGameMode* GMode = Cast<AShiftersGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
-		SetActorLocation(GetActorLocation() + FVector(-1.f, 0.f, 0.f) * DeltaTime * GMode->PlatformMovementSpeed);
+		SetActorLocation(GetActorLocation() + FVector(-1.f, 0.f, 0.f) * DeltaTime * GMode->GetPlatformSpeed());
 	}
 
 	// if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))

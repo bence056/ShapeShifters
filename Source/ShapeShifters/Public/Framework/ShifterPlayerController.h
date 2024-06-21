@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "ShifterPlayerController.generated.h"
 
+class UCheckpointWidget;
 class UPlayerHud;
 class AShifterCharacter;
 /**
@@ -27,6 +28,11 @@ public:
 	UPlayerHud* PlayerHud;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> PauseWidgetClass;
+	UPROPERTY(BlueprintReadWrite)
+	UCheckpointWidget* PauseWidget;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> PlayerDeathUIClass;
 	
 	UFUNCTION(BlueprintCallable)
@@ -40,6 +46,8 @@ public:
 	void CreateHealthPopup(float Health);
 	UFUNCTION()
 	void UpdatePowerupsVisual();
+	UFUNCTION(BlueprintCallable)
+	void TriggerCheckpointPaused(bool bPaused);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> HealthPopupWidget;

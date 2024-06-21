@@ -21,6 +21,7 @@ AShiftersGameMode::AShiftersGameMode()
 	MaximumWallWidth = 8;
 	GameCharacterPtr = nullptr;
 	PickupMaxSpawnTrials = 2;
+	bCheckpointPaused = true;
 }
 
 void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape)
@@ -78,8 +79,83 @@ void AShiftersGameMode::NotifyPowerupExpired(UPowerup* Powerup)
 	}
 }
 
+void AShiftersGameMode::EquipShape(EShapeType Type)
+{
+	if(UnlockedShapes.Contains(Type))
+	{
+		if(!ShapeLoadout.Contains(Type))
+		{
+			ShapeLoadout.Add(Type);
+			if(UAbility** Ability = ShapeAbilityTable.Find(Type))
+			{
+				(*Ability)->ResetAbility();
+			}
+		}
+	}
+}
+
+void AShiftersGameMode::UnequipShape(EShapeType Type)
+{
+	if(UnlockedShapes.Contains(Type))
+	{
+		if(ShapeLoadout.Contains(Type))
+		{
+			ShapeLoadout.Remove(Type);
+		}
+	}
+}
+
+void AShiftersGameMode::PauseAtCheckpoint(bool bPause)
+{
+	bCheckpointPaused = bPause;
+
+	if(bCheckpointPaused)
+	{
+		for(auto& Ability : ShapeAbilityTable)
+		{
+			Ability.Value->ExpireAbility(GameCharacterPtr);
+			Ability.Value->DisableCharging();
+		}
+		for(auto& Powerup : ActivePowerups)
+		{
+			Powerup->OnPowerupExpired();
+		}
+	}else
+	{
+		for(auto& Ability : ShapeAbilityTable)
+		{
+			Ability.Value->EnableCharging();
+		}
+		ShiftPlayer(GameCharacterPtr, ShapeLoadout[0]);
+	}
+	
+	if(AShifterPlayerController* ShifterPlayerController = Cast<AShifterPlayerController>(GameCharacterPtr->GetController()))
+	{
+		ShifterPlayerController->TriggerCheckpointPaused(bPause);
+	}
+}
+
+float AShiftersGameMode::GetPlatformSpeed()
+{
+	if(!bCheckpointPaused)
+	{
+		return PlatformMovementSpeed;
+	}
+	return 0.f;
+	
+}
+
+void AShiftersGameMode::SetPlatformSpeed(float Speed)
+{
+	PlatformMovementSpeed = Speed;
+}
+
+
 void AShiftersGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	PlatformMovementSpeed += DeltaSeconds * PlatformAcceleration;
+	if(!bCheckpointPaused)
+	{
+		PlatformMovementSpeed += DeltaSeconds * PlatformAcceleration;	
+	}
 }

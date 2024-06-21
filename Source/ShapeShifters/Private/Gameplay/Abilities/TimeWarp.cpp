@@ -18,9 +18,9 @@ void UTimeWarp::OnAbilityActivated(AShifterCharacter* PlayerCharacter)
 	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 	{
 		TempAccel = ShiftersGameMode->PlatformAcceleration;
-		TempSpeed = ShiftersGameMode->PlatformMovementSpeed;
+		TempSpeed = ShiftersGameMode->GetPlatformSpeed();
 		ShiftersGameMode->PlatformAcceleration = 0.f;
-		ShiftersGameMode->PlatformMovementSpeed *= PlatformSpeedMultiplier;
+		ShiftersGameMode->SetPlatformSpeed(ShiftersGameMode->GetPlatformSpeed() * PlatformSpeedMultiplier);
 	}
 }
 
@@ -28,7 +28,7 @@ void UTimeWarp::OnAbilityExpired(AShifterCharacter* PlayerCharacter)
 {
 	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		ShiftersGameMode->PlatformMovementSpeed = TempSpeed;
+		ShiftersGameMode->SetPlatformSpeed(TempSpeed);
 		ShiftersGameMode->PlatformAcceleration = TempAccel;
 	}
 	Super::OnAbilityExpired(PlayerCharacter);

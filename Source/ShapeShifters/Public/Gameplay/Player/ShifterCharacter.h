@@ -184,5 +184,8 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	float GetIFrameTimerPercent();
+
+	UFUNCTION(BlueprintCallable)
+	void InitializePlayerShape();
 	
 };

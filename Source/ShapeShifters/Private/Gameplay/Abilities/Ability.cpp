@@ -48,13 +48,16 @@ void UAbility::ActivateAbility(AShifterCharacter* PlayerCharacter)
 
 void UAbility::ExpireAbility(AShifterCharacter* PlayerCharacter)
 {
-	if(IsAbilityActive())
+	if(bTimeBased && IsAbilityActive())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(ActiveTimer);
 		EnableCharging();
 		OnAbilityExpired(PlayerCharacter);
+		
+	}else if(!bTimeBased)
+	{
+		OnAbilityExpired(PlayerCharacter);
 	}
-	
 }
 
 void UAbility::OnAbilityActivated(AShifterCharacter* PlayerCharacter)
@@ -110,6 +113,15 @@ void UAbility::DisableCharging()
 	if(GetWorld()->GetTimerManager().IsTimerActive(ChargeTimer))
 	{
 		GetWorld()->GetTimerManager().PauseTimer(ChargeTimer);
+	}
+}
+
+void UAbility::ResetAbility()
+{
+	if(AShiftersGameMode* GameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		StackCurrent = 0;
+		ExpireAbility(GameMode->GameCharacterPtr);
 	}
 }
 
