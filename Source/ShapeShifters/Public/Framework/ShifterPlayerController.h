@@ -44,11 +44,18 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CreateHealthPopup(float Health);
+
+	UFUNCTION(BlueprintCallable)
+	void CreateNotificationPopup(const FText& NotificationText);
+	
 	UFUNCTION()
 	void UpdatePowerupsVisual();
 	UFUNCTION(BlueprintCallable)
 	void TriggerCheckpointPaused(bool bPaused);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> NotificationPopupWidget;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> HealthPopupWidget;
 

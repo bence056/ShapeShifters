@@ -3,3 +3,9 @@
 
 #include "Gameplay/UMG/ShapeSlot.h"
 
+FShapeAbilityData::FShapeAbilityData()
+{
+	ShapeName = FText::FromString("");
+	ShapeAbilityDesc = FText::FromString("");
+	ShapePassiveDesc = FText::FromString("");
+}

@@ -11,6 +11,26 @@ enum class EShapeType : uint8;
 /**
  * 
  */
+
+USTRUCT(Blueprintable, BlueprintType)
+struct FShapeAbilityData
+{
+	GENERATED_BODY()
+
+public:
+
+	FShapeAbilityData();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText ShapeName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText ShapeAbilityDesc;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText ShapePassiveDesc;
+	
+	
+};
+
 UCLASS()
 class SHAPESHIFTERS_API UShapeSlot : public UUserWidget
 {
@@ -19,9 +39,6 @@ class SHAPESHIFTERS_API UShapeSlot : public UUserWidget
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ExposeOnSpawn))
-	EShapeType AssignedType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UCheckBox* CheckBoxWidget;
+	int32 ShapeIndex;
 	
 };

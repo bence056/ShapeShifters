@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Gameplay/UMG/ShapeSlot.h"
 #include "ShiftersGameMode.generated.h"
 
 class UPowerup;
@@ -69,6 +70,9 @@ public:
 	TMap<EShapeType, UStaticMesh*> ShapeMeshTable;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Instanced, Category = "Player")
 	TMap<EShapeType, UAbility*> ShapeAbilityTable;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shapes")
+	TMap<EShapeType, FShapeAbilityData> ShapeAbilityTexts;
 	
 	UFUNCTION(BlueprintCallable)
 	void ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape);

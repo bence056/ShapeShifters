@@ -156,6 +156,6 @@ void AShiftersGameMode::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	if(!bCheckpointPaused)
 	{
-		PlatformMovementSpeed += DeltaSeconds * PlatformAcceleration;	
+		PlatformMovementSpeed += DeltaSeconds * PlatformAcceleration;
 	}
 }

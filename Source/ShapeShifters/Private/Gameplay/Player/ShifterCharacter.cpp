@@ -271,7 +271,8 @@ void AShifterCharacter::SetPlayerHealth(float Health)
 						PlayerHealth = ShiftersGameMode->PlayerMaxHealth;
 						ObstacleCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 						GetWorld()->GetTimerManager().SetTimer(RebirthInvTimer, this, &AShifterCharacter::OnIFrameEnd, 5.f);
-						PlayerController->TriggerPlayerRebirth();
+						// PlayerController->TriggerPlayerRebirth();
+						PlayerController->CreateNotificationPopup(FText::FromString("Extra Life!"));
 					}
 				}else
 				{

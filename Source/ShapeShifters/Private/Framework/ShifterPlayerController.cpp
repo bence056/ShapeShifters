@@ -8,6 +8,7 @@
 #include "Framework/ShiftersGameMode.h"
 #include "Gameplay/UMG/CheckpointWidget.h"
 #include "Gameplay/UMG/HealthPopup.h"
+#include "Gameplay/UMG/NotificationPopup.h"
 #include "Gameplay/UMG/PlayerHud.h"
 #include "Kismet/GameplayStatics.h"
 #include "ShapeShifters/Public/Gameplay/Player/ShifterCharacter.h"
@@ -81,6 +82,14 @@ void AShifterPlayerController::CreateHealthPopup(float Health)
 	HealthPopup->DeltaHealth = Health;
 	HealthPopup->AddToViewport();
 	HealthPopup->TriggerPopup();
+}
+
+void AShifterPlayerController::CreateNotificationPopup(const FText& NotificationText)
+{
+	UNotificationPopup* NotificationPopup = CreateWidget<UNotificationPopup>(this, NotificationPopupWidget);
+	NotificationPopup->MessageText = NotificationText;
+	NotificationPopup->AddToViewport();
+	NotificationPopup->TriggerPopup();
 }
 
 void AShifterPlayerController::UpdatePowerupsVisual()
