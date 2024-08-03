@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Framework/ShifterPlayerController.h"
 #include "Framework/ShiftersGameMode.h"
 #include "Framework/Input/CharacterShiftInputAction.h"
@@ -42,6 +43,8 @@ AShifterCharacter::AShifterCharacter()
 	bHasExtraLife = false;
 	RollingBlockadeParticle = CreateDefaultSubobject<UNiagaraComponent>(TEXT("RollingBlockadeParticle"));
 	RollingBlockadeParticle->SetupAttachment(GetRootComponent());
+	PlayerHeadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerHeadWidget"));
+	PlayerHeadWidget->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned

@@ -8,6 +8,7 @@
 #include "NiagaraComponent.h"
 #include "ShifterCharacter.generated.h"
 
+class UWidgetComponent;
 enum class EPickupTypes : uint8;
 class AObstacle;
 class UCharacterShiftInputAction;
@@ -92,6 +93,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UNiagaraComponent* RollingBlockadeParticle;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UWidgetComponent* PlayerHeadWidget;
 	
 
 protected:
