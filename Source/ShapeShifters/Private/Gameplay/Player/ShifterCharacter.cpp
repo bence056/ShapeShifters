@@ -40,6 +40,8 @@ AShifterCharacter::AShifterCharacter()
 	bCanMove = true;
 	CurrentPowerup = EPickupTypes::None;
 	bHasExtraLife = false;
+	RollingBlockadeParticle = CreateDefaultSubobject<UNiagaraComponent>(TEXT("RollingBlockadeParticle"));
+	RollingBlockadeParticle->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
@@ -300,6 +302,10 @@ void AShifterCharacter::ChangePlayerHealth(float DeltaHealth)
 
 			float ShieldTakeDamage = FMath::Min(ShieldCurrentHealth, DeltaHealth);
 			ShieldCurrentHealth -= ShieldTakeDamage;
+			if(ShieldCurrentHealth == 0.f)
+			{
+				RollingBlockadeParticle->DeactivateImmediate();
+			}
 
 			if(!bShouldDropPlayerDamage)
 			{
@@ -341,12 +347,15 @@ void AShifterCharacter::ActivateShield()
 	if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
 	{
 		ShieldCurrentHealth = ShiftersGameMode->ShieldMaxHealth;
+		RollingBlockadeParticle->DeactivateImmediate();
+		RollingBlockadeParticle->Activate(true);
 	}
 }
 
 void AShifterCharacter::DeactivateShield()
 {
 	ShieldCurrentHealth = 0.f;
+	RollingBlockadeParticle->DeactivateImmediate();
 }
 
 float AShifterCharacter::GetShieldPercentage()

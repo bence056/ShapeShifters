@@ -30,6 +30,7 @@ void AWallObstacle::OnPlayerCollided(AShifterCharacter* Player)
 {
 	//kill instantly.
 	Player->SetPlayerHealth(0);
+	Player->RollingBlockadeParticle->DeactivateImmediate();
 	// Destroy();
 }
 

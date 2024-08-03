@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Gameplay/Pickups/Pickup.h"
+#include "NiagaraComponent.h"
 #include "ShifterCharacter.generated.h"
 
 enum class EPickupTypes : uint8;
@@ -88,6 +89,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	EPickupTypes CurrentPowerup;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UNiagaraComponent* RollingBlockadeParticle;
+	
 
 protected:
 	// Called when the game starts or when spawned
