@@ -113,7 +113,10 @@ public:
 	FGridData* GetCellDataAt(int32 X, int32 Y);
 	FPickupData* GetPickupDataAt(int32 X, int32 Y);
 
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bUseGlobalSeed;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "!bUseGlobalSeed", EditConditionHides = true))
 	bool bUseCustomSeed;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "bUseCustomSeed", EditConditionHides = true))
 	int32 CustomSeed;

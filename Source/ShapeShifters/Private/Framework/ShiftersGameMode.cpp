@@ -22,6 +22,7 @@ AShiftersGameMode::AShiftersGameMode()
 	GameCharacterPtr = nullptr;
 	PickupMaxSpawnTrials = 2;
 	bCheckpointPaused = true;
+	GlobalRandomizer = FRandomStream();
 }
 
 void AShiftersGameMode::ShiftPlayer(AShifterCharacter* Player, EShapeType ToShape)

@@ -27,6 +27,13 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int32 MaxPlatformCount = 10;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bFreeplaySpawn;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "!bFreeplaySpawn", EditConditionHides = true))
+	int32 FixPlaySeed;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "!bFreeplaySpawn", EditConditionHides = true))
+	int32 LevelLength;
 	
 
 protected:
@@ -39,6 +46,9 @@ protected:
 	void EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UPROPERTY()
+	int32 CurrentLevelLength;
 
 public:
 	// Called every frame

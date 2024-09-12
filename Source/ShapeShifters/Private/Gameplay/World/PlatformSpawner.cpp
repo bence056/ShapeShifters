@@ -4,6 +4,7 @@
 #include "Gameplay/World/PlatformSpawner.h"
 
 #include "Components/BoxComponent.h"
+#include "Framework/ShiftersGameMode.h"
 #include "Gameplay/World/Platform.h"
 
 
@@ -17,13 +18,25 @@ APlatformSpawner::APlatformSpawner()
 	SetRootComponent(SpawnArea);
 	SpawnArea->OnComponentEndOverlap.AddDynamic(this, &APlatformSpawner::EndOverlap);
 	SpawnArea->OnComponentBeginOverlap.AddDynamic(this, &APlatformSpawner::BeginOverlap);
-	
+	bFreeplaySpawn = true;
+	FixPlaySeed = 0;
+	LevelLength = 50;
+	CurrentLevelLength = 0;
 }
 
 // Called when the game starts or when spawned
 void APlatformSpawner::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if(!bFreeplaySpawn)
+	{
+		if(AShiftersGameMode* ShiftersGameMode = Cast<AShiftersGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			ShiftersGameMode->GlobalRandomizer = FRandomStream(FixPlaySeed);
+		}
+	}
+	
 	
 }
 
@@ -89,6 +102,7 @@ void APlatformSpawner::Tick(float DeltaTime)
 
 		//spawn the platform
 		APlatform* Platform = GetWorld()->SpawnActor<APlatform>(PlatformClass, SpawnLoc, FRotator::ZeroRotator);
+		if(!bFreeplaySpawn) CurrentLevelLength++;
 		if(PlatformsInArea.Num() >= 1)
 		{
 			Platform->LinkedPlatform = PlatformsInArea[PlatformsInArea.Num()-1];
@@ -111,7 +125,11 @@ void APlatformSpawner::Tick(float DeltaTime)
 		}
 		
 		PlatformsInArea.Add(Platform);
-		Platform->GeneratePlatformContents();
+		if(!bFreeplaySpawn) Platform->bUseGlobalSeed = true;
+		if(bFreeplaySpawn || CurrentLevelLength < LevelLength)
+		{
+			Platform->GeneratePlatformContents();
+		}
 		
 	}
 	

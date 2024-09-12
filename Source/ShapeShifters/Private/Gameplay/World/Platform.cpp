@@ -240,9 +240,17 @@ void APlatform::GeneratePlatformContents()
 	{
 		//phase 1:
 		//generate the damn walls.
+
+
 		
-		FRandomStream Stream = FRandomStream(CustomSeed);
-		if(!bUseCustomSeed) Stream.GenerateNewSeed();
+		FRandomStream RandStream = FRandomStream(CustomSeed);
+		if(!bUseCustomSeed) RandStream.GenerateNewSeed();
+		FRandomStream* Stream = &RandStream;
+
+		if(bUseGlobalSeed)
+		{
+			Stream = &(ShiftersGameMode->GlobalRandomizer);
+		}
 
 		for(int32 Rep =0; Rep<ShiftersGameMode->MaxWallSpawnTrials; Rep++)
 		{
@@ -253,12 +261,12 @@ void APlatform::GeneratePlatformContents()
 			}
 			if(PotentialRows.Num() > 0)
 			{
-				int32 SelectedRow = PotentialRows[Stream.RandRange(0, PotentialRows.Num()-1)];
-				int32 SelectedWidth = Stream.RandRange(ShiftersGameMode->MinimumWallWidth, ShiftersGameMode->MaximumWallWidth);
+				int32 SelectedRow = PotentialRows[Stream->RandRange(0, PotentialRows.Num()-1)];
+				int32 SelectedWidth = Stream->RandRange(ShiftersGameMode->MinimumWallWidth, ShiftersGameMode->MaximumWallWidth);
 				if(SelectedWidth >= 1)
 				{
 					int32 MaxWallColumn = 8-SelectedWidth;
-					int32 StartingCol = Stream.RandRange(0, MaxWallColumn);
+					int32 StartingCol = Stream->RandRange(0, MaxWallColumn);
 					
 					for(int32 i=StartingCol; i<StartingCol+SelectedWidth; i++)
 					{
@@ -295,7 +303,7 @@ void APlatform::GeneratePlatformContents()
 			EPlatformContentTypes Type = EPlatformContentTypes::None;
 			float SumWeight = 0;
 			for(auto& Pair : FixedMap.Array()) SumWeight += Pair.Value;
-			float RandomWeight = Stream.RandRange(0.f, SumWeight);
+			float RandomWeight = Stream->RandRange(0.f, SumWeight);
 			for(auto& Pair : FixedMap.Array())
 			{
 				if(RandomWeight <= Pair.Value)
@@ -309,7 +317,7 @@ void APlatform::GeneratePlatformContents()
 			TArray<FGridData*> AllowedGrids = GetAllowedWallReplacements(Type);
 			if(AllowedGrids.Num() > 0)
 			{
-				FGridData* SelectedGrid = AllowedGrids[Stream.RandRange(0, AllowedGrids.Num()-1)];
+				FGridData* SelectedGrid = AllowedGrids[Stream->RandRange(0, AllowedGrids.Num()-1)];
 				SpawnObstacle(Type, SelectedGrid->CellX, SelectedGrid->CellY);
 			}
 		}
@@ -336,7 +344,7 @@ void APlatform::GeneratePlatformContents()
 			}
 			if(bShouldBreak && ToBreak.Num() > 0)
 			{
-				FGridData* ReplaceGrid = ToBreak[Stream.RandRange(0, ToBreak.Num()-1)];
+				FGridData* ReplaceGrid = ToBreak[Stream->RandRange(0, ToBreak.Num()-1)];
 				SpawnObstacle(EPlatformContentTypes::None, ReplaceGrid->CellX, ReplaceGrid->CellY);
 			}
 		}
@@ -355,7 +363,7 @@ void APlatform::GeneratePlatformContents()
 			EPickupTypes PickupType = EPickupTypes::None;
 			float SumWeight = 0;
 			for(auto& Pair : ShiftersGameMode->PickupWeights.Array()) SumWeight += Pair.Value;
-			float RandomWeight = Stream.RandRange(0.f, SumWeight);
+			float RandomWeight = Stream->RandRange(0.f, SumWeight);
 			for(auto& Pair : ShiftersGameMode->PickupWeights.Array())
 			{
 				if(RandomWeight <= Pair.Value)

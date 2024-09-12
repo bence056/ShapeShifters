@@ -55,6 +55,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerups")
 	TMap<EPickupTypes, TSubclassOf<UPowerup>> PowerupClasses;
+
+	UPROPERTY(BlueprintReadWrite)
+	FRandomStream GlobalRandomizer;
 	
 
 	//player related stuff
