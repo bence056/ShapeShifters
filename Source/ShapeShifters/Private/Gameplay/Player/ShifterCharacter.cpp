@@ -281,6 +281,7 @@ void AShifterCharacter::SetPlayerHealth(float Health)
 					}
 				}else
 				{
+					DestroyPlayerMesh();
 					PlayerController->TriggerPlayerDeath();	
 				}
 			}
@@ -342,7 +343,7 @@ void AShifterCharacter::SetShapeType(EShapeType ToSet)
 
 void AShifterCharacter::OnPlayerShifted(EShapeType Shape)
 {
-	
+	UpdateDeathParticleMesh(Shape);
 }
 
 void AShifterCharacter::ActivateShield()

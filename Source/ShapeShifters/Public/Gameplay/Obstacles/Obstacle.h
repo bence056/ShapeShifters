@@ -41,6 +41,9 @@ protected:
 	UFUNCTION()
 	FORCEINLINE FVector GetRelativeLocation() {return OwningPlatform->GetActorLocation() - GetActorLocation();}
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnPlayerDamageTaken();
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

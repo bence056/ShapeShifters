@@ -141,6 +141,9 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite)
 	EShapeType CurrentShapeType;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DestroyPlayerMesh();
 	
 public:
 	// Called every frame
@@ -171,6 +174,8 @@ public:
 	void SetShapeType(EShapeType ToSet);
 	UFUNCTION()
 	void OnPlayerShifted(EShapeType Shape);
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateDeathParticleMesh(EShapeType Shape);
 	UFUNCTION(BlueprintCallable)
 	void ActivateShield();
 	UFUNCTION(BlueprintCallable)

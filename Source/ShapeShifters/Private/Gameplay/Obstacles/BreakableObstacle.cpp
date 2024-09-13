@@ -24,3 +24,8 @@ void ABreakableObstacle::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ABreakableObstacle::OnWallShot()
+{
+	OnWallShot_Internal();
+}
+

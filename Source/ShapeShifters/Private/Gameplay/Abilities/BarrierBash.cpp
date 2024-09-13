@@ -23,7 +23,11 @@ void UBarrierBash::OnAbilityActivated(AShifterCharacter* PlayerCharacter)
 		if(HitResult.GetActor() && HitResult.GetActor()->GetClass()->IsChildOf(ABreakableObstacle::StaticClass()))
 		{
 			//destroy the wall.
-			HitResult.GetActor()->Destroy();	
+			if(ABreakableObstacle* BreakableObstacle = Cast<ABreakableObstacle>(HitResult.GetActor()))
+			{
+				BreakableObstacle->OnWallShot();
+			}
+				
 		}
 	}
 	

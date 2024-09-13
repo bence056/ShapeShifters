@@ -57,6 +57,8 @@ void AObstacle::OnPlayerCollided(AShifterCharacter* Player)
 	case EShapeType::MobiusStrip:
 		break;
 	}
+
+	OnPlayerDamageTaken();
 	
 	Player->ChangePlayerHealth(-DamageToDeal);
 }
